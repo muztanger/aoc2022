@@ -5,7 +5,7 @@ Advent of Code 2022
 * [ ] Record structs
 * [ ] Parameterless struct constructors
 * [x] Global using directive
-* [ ] File scoped namespaces
+* [x] File scoped namespaces
 * [ ] Extended property patterns
 * [ ] Improved interpolated strings
 * [ ] Constant interpolated strings

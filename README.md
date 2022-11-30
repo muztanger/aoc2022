@@ -2,9 +2,10 @@
 
 This year I aim at exploring .NET 7, C#10 and C#11
 
-https://learn.microsoft.com/en-us/dotnet/whats-new/dotnet-7-docs
-https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-7
-https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-11
+- [.NET docs: What's new for the .NET 7 release](https://learn.microsoft.com/en-us/dotnet/whats-new/dotnet-7-docs)
+- [What's new in .NET 7](https://learn.microsoft.com/en-us/dotnet/core/whats-new/dotnet-7)
+- [What's new in C# 11](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-11)
+- [What's new in C# 10](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-10)
 
 ## C# 11 features to explore
 

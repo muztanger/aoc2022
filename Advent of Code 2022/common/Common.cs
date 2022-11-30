@@ -15,7 +15,7 @@ public static class Common
         }
 
         int counter = 0;
-        string line;
+        string? line;
 
         // Read the file and display it line by line.  
         using var file = new StreamReader(fileName);
@@ -133,7 +133,6 @@ public static class Common
     /// <typeparam name="T"></typeparam>
     /// <param name="a"></param>
     /// <param name="b"></param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static void Swap<T>(ref T a, ref T b)
     {
         T temp = a;
@@ -188,8 +187,13 @@ public static class Common
 
 public class GeneralizedComparer<T> : IComparer<T> where T : IComparable
 {
-    int IComparer<T>.Compare(T x, T y)
+    int IComparer<T>.Compare(T? x, T? y)
     {
+        if (x == null)
+        {
+            return y == null ? 0 : 1;
+        }
+
         int comp = x.CompareTo(y);
 
         if (comp != 0)

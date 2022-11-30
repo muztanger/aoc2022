@@ -1,5 +1,6 @@
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using System.Collections.Generic;
+global using System.Collections;
 global using System.Diagnostics.CodeAnalysis;
 global using System.IO;
 global using System.Linq;

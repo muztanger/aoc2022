@@ -8,8 +8,8 @@ public class Generate
     [TestMethod]
     public void GenerateDay()
     {
-        //int day = DateTime.Now.Day;
-        var day = 1;
+        int day = DateTime.Now.Day;
+        //var day = 1;
         string dayStr = $"Day{day:D2}";
         var baseDir  = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..");
         {
@@ -107,7 +107,7 @@ public class Generate
     }
     public static async Task<string> GetDayInput(int day)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://adventofcode.com/2016/day/{day}/input");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"https://adventofcode.com/2022/day/{day}/input");
         var cookieFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "Cookie.dat");
         if (!File.Exists(cookieFile))
         {

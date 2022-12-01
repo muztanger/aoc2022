@@ -3,7 +3,7 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Day01
 {
-    private static string Part1(IEnumerable<string> input)
+    private static string Calc(IEnumerable<string> input, int n)
     {
         var elfs = new List<long>();
         var sum = 0L;
@@ -20,27 +20,7 @@ public class Day01
             }
         }
         elfs.Add(sum);
-        return elfs.Max().ToString();
-    }
-    
-    private static string Part2(IEnumerable<string> input)
-    {
-        var elfs = new List<long>();
-        var sum = 0L;
-        foreach (var line in input)
-        {
-            if (string.IsNullOrEmpty(line))
-            {
-                elfs.Add(sum);
-                sum = 0L;
-            }
-            else
-            {
-                sum += long.Parse(line);
-            }
-        }
-        elfs.Add(sum);
-        return elfs.Select(x => x).OrderByDescending(x => x).Take(3).Sum().ToString();
+        return elfs.OrderByDescending(x => x).Take(n).Sum().ToString();
     }
     
     [TestMethod]
@@ -62,25 +42,15 @@ public class Day01
 
             10000
             """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day01_Part1_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        var result = Calc(Common.GetLines(input), 1);
+        Assert.AreEqual("24000", result);
     }
     
     [TestMethod]
     public void Day01_Part1()
     {
-        var result = Part1(Common.DayInput(nameof(Day01)));
-        Assert.AreEqual("", result);
+        var result = Calc(Common.DayInput(nameof(Day01)), 1);
+        Assert.AreEqual("72017", result);
     }
     
     [TestMethod]
@@ -102,25 +72,15 @@ public class Day01
             
             10000
             """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day01_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        var result = Calc(Common.GetLines(input), 3);
+        Assert.AreEqual("45000", result);
     }
     
     [TestMethod]
     public void Day01_Part2()
     {
-        var result = Part2(Common.DayInput(nameof(Day01)));
-        Assert.AreEqual("", result);
+        var result = Calc(Common.DayInput(nameof(Day01)), 3);
+        Assert.AreEqual("212520", result);
     }
     
 }

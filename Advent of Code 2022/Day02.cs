@@ -3,66 +3,44 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Day02
 {
-    class Player
-    {
-        public int Id { get; set; }
-        public int Score { get; set; }
-    }
-
+    public enum Play { Rock = 1, Paper = 2, Scissors = 3, None = 4}
+    
     public class Game
     {
-        private Dictionary<string, int> shapeScore = new Dictionary<string, int>
-        {
-            {"R", 1 },
-            {"P", 2 },
-            {"S", 3 },
-        };
-        public int Round(string oponent, string me)
+        public int TotalScore { get; private set; } = 0;
+        
+        public void Round(Play oponent, Play me)
         {
             // shape you selected (1 for Rock, 2 for Paper, and 3 for Scissors)
             // plus the score for the outcome of the round (0 if you lost, 3 if the round was a draw, and 6 if you won)
-            int shape = shapeScore[me];
-            int outcome = 0;
-            if (oponent == "R" && me == "R")
+
+            int shape = (int)me;
+            int outcome = 3;
+
+            if (oponent == me)
             {
                 outcome = 3;
             }
-            else if (oponent == "R" && me == "P")
+            else if (oponent == Play.Rock)
             {
-                outcome = 6;
+                outcome = me == Play.Paper ? 6 : 0;
             }
-            else if (oponent == "R" && me == "S")
+            else if (oponent == Play.Paper)
             {
-                outcome = 0;
+                outcome = me == Play.Rock ? 0 : 6;
             }
-            else if (oponent == "P" && me == "R")
+            else if (oponent == Play.Scissors)
             {
-                outcome = 0;
+                outcome = me == Play.Rock ? 6 : 0;
             }
-            else if (oponent == "P" && me == "P")
+            else 
             {
-                outcome = 3;
+                Assert.Fail();
             }
-            else if (oponent == "P" && me == "S")
-            {
-                outcome = 6;
-            }
-            else if (oponent == "S" && me == "R")
-            {
-                outcome = 6;
-            }
-            else if (oponent == "S" && me == "P")
-            {
-                outcome = 0;
-            }
-            else if (oponent == "S" && me == "S")
-            {
-                outcome = 3;
-            }
-            return shape + outcome;
+            TotalScore += shape + outcome;
         }
 
-        public string Tactic(string oponent, string tactic)
+        public Play Tactic(Play oponent, string tactic)
         {
             //X means you need to lose, Y means you need to end the round in a draw, and Z means you need to win. Good luck!"
             if (tactic == "Y")
@@ -70,144 +48,107 @@ public class Day02
                 return oponent;
             }
 
-            if (oponent == "R" && tactic == "X")
+            if (oponent == Play.Rock)
             {
-                return "S";
+                return tactic == "X" ? Play.Scissors : Play.Paper;
             }
-            else if (oponent == "R" && tactic == "Z")
+            else if (oponent == Play.Paper)
             {
-                return "P";
+                return tactic == "X" ? Play.Rock : Play.Scissors;
             }
-            else if (oponent == "P" && tactic == "X")
+            else if (oponent == Play.Scissors)
             {
-                return "R";
-            }
-            else if (oponent == "P" && tactic == "Z")
-            {
-                return "S";
-            }
-            else if (oponent == "S" && tactic == "X")
-            {
-                return "P";
-            }
-            else if (oponent == "S" && tactic == "Z")
-            {
-                return "R";
+                return tactic == "X" ? Play.Paper : Play.Rock;
             }
             Assert.Fail();
-            return "FAIL";
+            return Play.None;
         }
     }
-    private static string Part1(IEnumerable<string> input)
+
+    public static Play PlayFromString(string str)
     {
-        var dict = new Dictionary<string, string>();
-        dict.Add("A", "R");
-        dict.Add("B", "P");
-        dict.Add("C", "S");
-        dict.Add("X", "R");
-        dict.Add("Y", "P");
-        dict.Add("Z", "S");
-        var p1 = new Player { Id = 1, Score = 0 };
-        var p2 = new Player { Id = 2, Score = 0 };
-        var result = new StringBuilder();
+        var result = Play.None;
+        switch (str)
+        {
+            case "R":
+            case "A":
+            case "X":
+                result = Play.Rock;
+                break;
+            case "P":
+            case "B":
+            case "Y":
+                result = Play.Paper;
+                break;
+            case "S":
+            case "C":
+            case "Z":
+                result = Play.Scissors;
+                break;
+        }
+        return result;
+    }
+
+    private static int Part1(IEnumerable<string> input)
+    {
         var game = new Game();
-        var total = 0;
         foreach (var line in input)
         {
             var split = line.Split();
-            var x = dict[split[0]];
-            var y = dict[split[1]];
-            var round = game.Round(x, y);
-            Console.WriteLine($"opponent={x} me={y} round={round}");
-            total += round;
-
+            var oponent = PlayFromString(split[0]);
+            var me = PlayFromString(split[1]);
+            game.Round(oponent, me);
+            Console.WriteLine($"opponent={oponent} me={me} TotalScore={game.TotalScore}");
         }
-        return total.ToString();
+        return game.TotalScore;
     }
     
-    private static string Part2(IEnumerable<string> input)
+    private static int Part2(IEnumerable<string> input)
     {
-        var dict = new Dictionary<string, string>();
-        dict.Add("A", "R");
-        dict.Add("B", "P");
-        dict.Add("C", "S");
-        //dict.Add("X", "R");
-        //dict.Add("Y", "P");
-        //dict.Add("Z", "S");
-        var p1 = new Player { Id = 1, Score = 0 };
-        var p2 = new Player { Id = 2, Score = 0 };
-        var result = new StringBuilder();
         var game = new Game();
-        var total = 0;
         foreach (var line in input)
         {
             var split = line.Split();
-            var x = dict[split[0]];
-            var y = game.Tactic(x, split[1]);
-            var round = game.Round(x, y);
-            Console.WriteLine($"opponent={x} me={y} round={round}");
-            total += round;
-
+            var oponent = PlayFromString(split[0]);
+            var me = game.Tactic(oponent, split[1]);
+            game.Round(oponent, me);
+            Console.WriteLine($"opponent={oponent} me={me} TotalScore={game.TotalScore}");
         }
-        return total.ToString();
+        return game.TotalScore;
     }
     
+    private readonly string _example = """
+        A Y
+        B X
+        C Z
+        """;
+
     [TestMethod]
     public void Day02_Part1_Example01()
     {
-        var input = """
-            A Y
-            B X
-            C Z
-            """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day02_Part1_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        var result = Part1(Common.GetLines(_example));
+        Assert.AreEqual(15, result);
     }
     
     [TestMethod]
     public void Day02_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day02)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual(11475, result);
     }
     
     [TestMethod]
     public void Day02_Part2_Example01()
     {
-        var input = """
-            A Y
-            B X
-            C Z
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day02_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        var result = Part2(Common.GetLines(_example));
+        Assert.AreEqual(12, result);
     }
     
     [TestMethod]
     public void Day02_Part2()
     {
         var result = Part2(Common.DayInput(nameof(Day02)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual(16862, result);
     }
     
 }

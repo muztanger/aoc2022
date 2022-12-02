@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Advent_of_Code_2022;
+﻿namespace Advent_of_Code_2022.Commons;
 
 public class Pos3<T> where T : INumber<T>
 {

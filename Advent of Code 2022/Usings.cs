@@ -1,3 +1,4 @@
+global using Advent_of_Code_2022.Commons;
 global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using System.Collections.Generic;
 global using System.Collections;

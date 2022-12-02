@@ -1,4 +1,4 @@
-﻿namespace Advent_of_Code_2022;
+﻿namespace Advent_of_Code_2022.Commons;
 
 public class DefaultValueDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     where TKey : notnull

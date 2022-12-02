@@ -1,4 +1,4 @@
-﻿namespace Advent_of_Code_2022.common;
+﻿namespace Advent_of_Code_2022.Commons;
 
 public class Box<T> where T : INumber<T>
 {

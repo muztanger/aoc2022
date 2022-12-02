@@ -1,4 +1,4 @@
-﻿namespace Advent_of_Code_2022;
+﻿namespace Advent_of_Code_2022.Commons;
 
 public class PosN : IEquatable<PosN>
 {

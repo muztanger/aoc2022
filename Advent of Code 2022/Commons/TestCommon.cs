@@ -58,4 +58,42 @@ public class TestCommon
         Assert.AreEqual(new PosN<long>(5, 7, 9, 11), p1 + p2);
         Assert.AreEqual(new PosN<long>(-3, -3, -3, -3), p1 - p2);
     }
+
+    [TestMethod]
+    public void TestAllCombos()
+    {
+        var bag = new List<List<int>>();
+        bag.Add(new List<int> { 1 });
+        bag.Add(new List<int> { 2 });
+        bag.Add(new List<int> { 3 });
+        bag.Add(new List<int> { 1, 2 });
+        bag.Add(new List<int> { 1, 3 });
+        bag.Add(new List<int> { 2, 3 });
+        bag.Add(new List<int> { 1, 2, 3 });
+        var c = 0;
+        bool Exist(List<int> x)
+        {
+            foreach (var list in bag)
+            {
+                var success = true;
+                if (x.Count != list.Count) continue;
+                for (int i = 0; i < x.Count; i++)
+                {
+                    if (x[i] != list[i])
+                    {
+                        success = false;
+                        break;
+                    }
+                }
+                if (success) return true;
+            }
+            return false;
+        }
+        foreach (var list in Common.GetAllCombos(new List<int> { 1, 2, 3 }))
+        {
+            Assert.IsTrue(Exist(list), string.Join(", ", list));
+            c++;
+        }
+        Assert.AreEqual(bag.Count, c);
+    }
 }

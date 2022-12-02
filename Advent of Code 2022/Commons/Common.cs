@@ -30,8 +30,8 @@ public static class Common
 
     public static IEnumerable<string> GetLines(string input)
     {
-        using StringReader reader = new StringReader(input);
-        string line;
+        using StringReader reader = new(input);
+        string? line;
         while ((line = reader.ReadLine()) != null)
         {
             yield return line;
@@ -127,24 +127,14 @@ public static class Common
                 (t1, t2) => t1.Concat(new T[] { t2 }));
     }
 
-    /// <summary>
-    /// Swap 2 elements of same type
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
     static void Swap<T>(ref T a, ref T b)
     {
-        T temp = a;
-        a = b;
-        b = temp;
+        (b, a) = (a, b);
     }
 
     public static IList<T> Swap<T>(this IList<T> list, int indexA, int indexB)
     {
-        T tmp = list[indexA];
-        list[indexA] = list[indexB];
-        list[indexB] = tmp;
+        (list[indexB], list[indexA]) = (list[indexA], list[indexB]);
         return list;
     }
 
@@ -152,7 +142,7 @@ public static class Common
     public static List<List<T>> GetAllCombos<T>(List<T> list)
     {
         int comboCount = (int)Math.Pow(2, list.Count) - 1;
-        List<List<T>> result = new List<List<T>>();
+        List<List<T>> result = new();
         for (int i = 1; i < comboCount + 1; i++)
         {
             // make each combo here
@@ -173,8 +163,15 @@ public static class Common
 
         unchecked
         {
-            return sequence.Aggregate(seed, (current, item) =>
-                (current * modifier) + item.GetHashCode());
+            var result = seed;
+            foreach (var item in sequence)
+            {
+                if (item != null)
+                {
+                    result += (result * modifier) + item.GetHashCode();
+                }
+            }
+            return result;
         }
     }
 
@@ -203,13 +200,13 @@ public class GeneralizedComparer<T> : IComparer<T> where T : IComparable
     }
 }
 
-public sealed class ReverseComparer<T> : IComparer<T>
-{
-    private readonly IComparer<T> inner;
-    public ReverseComparer() : this(inner: null) { }
-    public ReverseComparer(IComparer<T> inner)
-    {
-        this.inner = inner ?? Comparer<T>.Default;
-    }
-    int IComparer<T>.Compare(T? x, T? y) { return inner.Compare(y, x); }
-}
+//public sealed class ReverseComparer<T> : IComparer<T>
+//{
+//    private readonly IComparer<T> inner;
+//    public ReverseComparer() : this(inner: null) { }
+//    public ReverseComparer(IComparer<T> inner)
+//    {
+//        this.inner = inner ?? Comparer<T>.Default;
+//    }
+//    int IComparer<T>.Compare(T? x, T? y) { return inner.Compare(y, x); }
+//}

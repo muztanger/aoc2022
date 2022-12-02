@@ -4,7 +4,7 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Generate
 {
-    static readonly HttpClient client = new HttpClient();
+    static readonly HttpClient client = new();
 
     [TestMethod]
     public void GenerateDay()
@@ -101,7 +101,7 @@ public class Generate
                 pad--;
                 WriteLine("}");
 
-                string Padding() => new String(' ', 4 * pad);
+                string Padding() => new(' ', 4 * pad);
                 void WriteLine(string str="") => writer.WriteLine($"{Padding()}{str}");
             }
         }

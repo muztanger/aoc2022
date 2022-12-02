@@ -15,7 +15,7 @@ This year I aim at exploring .NET 7, C#10 and C#11
 * [ ] UTF-8 string literals
 * [ ] Newlines in string interpolation expressions
 * [ ] List patterns
-* [ ] File-local types
+* [x] File-local types
 * [ ] Required members
 * [ ] Auto-default structs
 * [ ] Pattern match Span<char> on a constant string

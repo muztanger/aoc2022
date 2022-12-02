@@ -50,8 +50,12 @@ public class TestCommon
     [TestMethod]
     public void TestPosN()
     {
-        var p = new PosN<long>(1, 2, 3, 4);
-        var actual = p.Dist<double>(new PosN<long>(4, 5, 6, 7));
+        var p1 = new PosN<long>(1, 2, 3, 4);
+        var p2 = new PosN<long>(4, 5, 6, 7);
+        var actual = p1.Dist<double>(p2);
         Assert.AreEqual(6.0, actual, double.Epsilon);
+
+        Assert.AreEqual(new PosN<long>(5, 7, 9, 11), p1 + p2);
+        Assert.AreEqual(new PosN<long>(-3, -3, -3, -3), p1 - p2);
     }
 }

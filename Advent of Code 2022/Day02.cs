@@ -89,28 +89,22 @@ public class Day02
         return result;
     }
 
-    private static int Part1(IEnumerable<string> input)
+    private static int Calc(IEnumerable<string> input, bool useTactics)
     {
         var game = new Game();
         foreach (var line in input)
         {
             var split = line.Split();
             var oponent = PlayFromString(split[0]);
-            var me = PlayFromString(split[1]);
-            game.Round(oponent, me);
-            Console.WriteLine($"opponent={oponent} me={me} TotalScore={game.TotalScore}");
-        }
-        return game.TotalScore;
-    }
-    
-    private static int Part2(IEnumerable<string> input)
-    {
-        var game = new Game();
-        foreach (var line in input)
-        {
-            var split = line.Split();
-            var oponent = PlayFromString(split[0]);
-            var me = game.Tactic(oponent, split[1]);
+            Play me;
+            if (useTactics)
+            {
+                me = game.Tactic(oponent, split[1]);
+            }
+            else
+            {
+                me = PlayFromString(split[1]);
+            }
             game.Round(oponent, me);
             Console.WriteLine($"opponent={oponent} me={me} TotalScore={game.TotalScore}");
         }
@@ -126,28 +120,28 @@ public class Day02
     [TestMethod]
     public void Day02_Part1_Example01()
     {
-        var result = Part1(Common.GetLines(_example));
+        var result = Calc(Common.GetLines(_example), useTactics: false);
         Assert.AreEqual(15, result);
     }
     
     [TestMethod]
     public void Day02_Part1()
     {
-        var result = Part1(Common.DayInput(nameof(Day02)));
+        var result = Calc(Common.DayInput(nameof(Day02)), useTactics: false);
         Assert.AreEqual(11475, result);
     }
     
     [TestMethod]
     public void Day02_Part2_Example01()
     {
-        var result = Part2(Common.GetLines(_example));
+        var result = Calc(Common.GetLines(_example), useTactics: true);
         Assert.AreEqual(12, result);
     }
     
     [TestMethod]
     public void Day02_Part2()
     {
-        var result = Part2(Common.DayInput(nameof(Day02)));
+        var result = Calc(Common.DayInput(nameof(Day02)), useTactics: true);
         Assert.AreEqual(16862, result);
     }
     

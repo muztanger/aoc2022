@@ -1,4 +1,5 @@
-﻿namespace Advent_of_Code_2022.Commons;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+namespace Advent_of_Code_2022.Commons;
 
 [TestClass]
 public class TestCommon
@@ -44,5 +45,13 @@ public class TestCommon
         var p = new Pos3<int>(0, 0, 0);
         var actual = p.Dist<double>(new Pos3<int>(2, 3, 6));
         Assert.AreEqual(7.0, actual, double.Epsilon);
+    }
+
+    [TestMethod]
+    public void TestPosN()
+    {
+        var p = new PosN<long>(1, 2, 3, 4);
+        var actual = p.Dist<double>(new PosN<long>(4, 5, 6, 7));
+        Assert.AreEqual(6.0, actual, double.Epsilon);
     }
 }

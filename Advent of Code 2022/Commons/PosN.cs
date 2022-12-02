@@ -1,61 +1,60 @@
 ﻿namespace Advent_of_Code_2022.Commons;
 
-public class PosN : IEquatable<PosN>
+public class PosN<T>
+    where T : INumber<T>, IEquatable<T>
 {
-    public List<int> values;
-    private readonly int N;
-    public PosN(int[] w)
+    public List<T> values;
+    public int Count => values.Count;
+
+    public PosN(params T[] w)
     {
-        values = w.ToList();
-        N = values.Count;
+        values = w.ToList<T>();
     }
 
-    public PosN(PosN other)
+    public PosN(PosN<T> other)
     {
-        values = new List<int>(other.values);
-        N = values.Count;
+        values = new List<T>(other.values);
     }
 
-    public PosN(IEnumerable<int> v)
+    public PosN(IEnumerable<T> v)
     {
         this.values = v.ToList();
-        N = values.Count;
     }
 
-    public static PosN operator *(PosN p1, int n)
+    public static PosN<T> operator *(PosN<T> p1, T n)
     {
-        return new PosN(p1.values.Select(z => n * z));
+        return new PosN<T>(p1.values.Select(z => n * z));
     }
 
-    public static PosN operator +(PosN p1, PosN p2)
+    public static PosN<T> operator +(PosN<T> p1, PosN<T> p2)
     {
-        return new PosN(p1.values.Zip(p2.values, (x,y) => x + y).ToList());
+        return new PosN<T>(p1.values.Zip(p2.values, (x,y) => x + y).ToList());
     }
-    public static PosN operator -(PosN p) => new PosN(p.values.Select(x => -x));
+    public static PosN<T> operator -(PosN<T> p) => new PosN<T>(p.values.Select(x => -x));
 
-    public static PosN operator -(PosN p1, PosN p2) => p1 + (-p2);
+    public static PosN<T> operator -(PosN<T> p1, PosN<T> p2) => p1 + (-p2);
 
     public override string ToString()
     {
         return $"({string.Join(",", values)})";
     }
 
-    internal int Manhattan(PosN inter)
+    internal T Manhattan(PosN<T> inter)
     {
-        return values.Zip(inter.values, (x, y) => Math.Abs(x - y)).Sum(); ;
+        T sum = T.Zero;
+        foreach (var x in values.Zip(inter.values, (x, y) => T.Abs(x - y)))
+        {
+            sum += x;
+        }
+        return sum;
     }
 
-    bool IEquatable<PosN>.Equals(PosN other)
+    public override bool Equals(object? obj)
     {
-        return this.values.Zip(other.values, (x, y) => x == y).Aggregate((result, z) => result &= z);
+        return Equals(obj as PosN<T>);
     }
 
-    public override bool Equals(object obj)
-    {
-        return Equals(obj as PosN);
-    }
-
-    public bool Equals([AllowNull] PosN other)
+    public bool Equals([AllowNull] PosN<T> other)
     {
         return other != null && this.values.Zip(other.values, (x, y) => x == y).Aggregate((result, z) => result &= z);
     }
@@ -70,9 +69,15 @@ public class PosN : IEquatable<PosN>
         return hash;
     }
 
-    internal double Dist(PosN p1)
+    internal TResult Dist<TResult>(PosN<T> p1)
+        where TResult : IFloatingPoint<TResult>, IRootFunctions<TResult>
     {
         var delta = p1 - this;
-        return Math.Sqrt(delta.values.Select(x => x * x).Sum());
+        TResult squareSum = TResult.Zero;
+        foreach (var x2 in delta.values.Select(x => TResult.CreateChecked(x * x)))
+        {
+            squareSum += x2;
+        }
+        return TResult.Sqrt(squareSum);
     }
 }

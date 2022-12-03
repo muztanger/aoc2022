@@ -1,3 +1,4 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Advent_of_Code_2022;
@@ -5,103 +6,55 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Day03
 {
-    private static string Part1(IEnumerable<string> input)
-    {
-        var result = 0;
-        foreach (var line in input)
-        {
-            // rucksack two compartments
-            var c1 = string.Concat(line.Take(line.Length / 2));
-            var c2 = string.Concat(line.Skip(line.Length / 2));
-            Console.WriteLine($"line={line} c1={c1} c2={c2}");
-            
-            var priority = new Dictionary<char, int>();
-            var lower = "abcdefghijklmnopqrstuvwxyz";
-            for (int i = 0; i < lower.Length; i++)
-            {
-                priority[lower[i]] = i + 1;
-                priority[Char.ToUpper(lower[i])] = i + 27;
-            }
-            Assert.AreEqual(26 * 2, priority.Count);
-            Assert.AreEqual(1, priority['a']);
-            Assert.AreEqual(26, priority['z']);
-            Assert.AreEqual(27, priority['A']);
-            Assert.AreEqual(52, priority['Z']);
+    private readonly Dictionary<char, int> _priority;
 
-            foreach (char c in c1)
-            {
-                if (c2.Contains(c))
-                {
-                    Console.WriteLine($"Found: {c} {priority[c]}");
-                    result += priority[c];
-                    break;
-                }
-            }
-        }
-        return result.ToString();
-    }
-    
-    private static string Part2(IEnumerable<string> input)
+    public Day03()
     {
-        var priority = new Dictionary<char, int>();
+        _priority = new Dictionary<char, int>();
         var lower = "abcdefghijklmnopqrstuvwxyz";
         for (int i = 0; i < lower.Length; i++)
         {
-            priority[lower[i]] = i + 1;
-            priority[Char.ToUpper(lower[i])] = i + 27;
+            _priority[lower[i]] = i + 1;
+            _priority[Char.ToUpper(lower[i])] = i + 27;
         }
-        Assert.AreEqual(26 * 2, priority.Count);
-        Assert.AreEqual(1, priority['a']);
-        Assert.AreEqual(26, priority['z']);
-        Assert.AreEqual(27, priority['A']);
-        Assert.AreEqual(52, priority['Z']);
+    }
 
+    private string Part1(IEnumerable<string> input)
+    {
         var result = 0;
-        var group = new List<string>();
         foreach (var line in input)
         {
-            group.Add(line);
-            if (group.Count == 3)
-            {
-                foreach (char c in group[0])
-                {
-                    if (group[1].Contains(c) && group[2].Contains(c))
-                    {
-                        Console.WriteLine($"Found: {c} {priority[c]}");
-                        result += priority[c];
-                        break;
-                    }
-                }
-                group.Clear();
-            }
-
+            var c = line.Take(line.Length / 2).Where(c => line.Skip(line.Length /2).Contains(c)).First();
+            result += _priority[c];
         }
         return result.ToString();
     }
     
+    private string Part2(IEnumerable<string> input)
+    {
+        var result = 0;
+        foreach (var group in input.Chunk(3))
+        {
+            var c = group[0].Where(c => group[1].Contains(c) && group[2].Contains(c)).First();
+            result += _priority[c];
+        }
+        return result.ToString();
+    }
+    
+    readonly string _example = """
+        vJrwpWtwJgWrhcsFMMfFFhFp
+        jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+        PmmdzqPrVvPwwTWBwg
+        wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+        ttgJtRGJQctTZtZT
+        CrZsJsPPZsGzwwsLwLmpwMDw
+        """;
+
     [TestMethod]
     public void Day03_Part1_Example01()
     {
-        var input = """
-            vJrwpWtwJgWrhcsFMMfFFhFp
-            jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
-            PmmdzqPrVvPwwTWBwg
-            wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
-            ttgJtRGJQctTZtZT
-            CrZsJsPPZsGzwwsLwLmpwMDw
-            """;
-        var result = Part1(Common.GetLines(input));
+        var result = Part1(Common.GetLines(_example));
         Assert.AreEqual("157", result);
-    }
-    
-    [TestMethod]
-    public void Day03_Part1_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
     }
     
     [TestMethod]
@@ -114,33 +67,24 @@ public class Day03
     [TestMethod]
     public void Day03_Part2_Example01()
     {
-        var input = """
-            vJrwpWtwJgWrhcsFMMfFFhFp
-            jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
-            PmmdzqPrVvPwwTWBwg
-            wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
-            ttgJtRGJQctTZtZT
-            CrZsJsPPZsGzwwsLwLmpwMDw
-            """;
-        var result = Part2(Common.GetLines(input));
+        var result = Part2(Common.GetLines(_example));
         Assert.AreEqual("70", result);
-    }
-    
-    [TestMethod]
-    public void Day03_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
     }
     
     [TestMethod]
     public void Day03_Part2()
     {
         var result = Part2(Common.DayInput(nameof(Day03)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("2425", result);
     }
-    
+
+    [TestMethod]
+    public void Day03_TestPriority()
+    {
+        Assert.AreEqual(26 * 2, _priority.Count);
+        Assert.AreEqual(1, _priority['a']);
+        Assert.AreEqual(26, _priority['z']);
+        Assert.AreEqual(27, _priority['A']);
+        Assert.AreEqual(52, _priority['Z']);
+    }
 }

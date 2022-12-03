@@ -106,7 +106,6 @@ public class Day02
                 me = Game.PlayFromString(split[1]);
             }
             game.Round(oponent, me);
-            Console.WriteLine($"opponent={oponent} me={me} TotalScore={game.TotalScore}");
         }
         return game.TotalScore;
     }

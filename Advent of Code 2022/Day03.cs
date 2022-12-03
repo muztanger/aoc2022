@@ -1,6 +1,3 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Security.Cryptography.X509Certificates;
-
 namespace Advent_of_Code_2022;
 
 [TestClass]

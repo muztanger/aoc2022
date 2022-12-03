@@ -37,7 +37,7 @@ file class Game
         TotalScore += shape + outcome;
     }
 
-    public Play Tactic(Play oponent, string tactic)
+    public static Play Tactic(Play oponent, string tactic)
     {
         //X means you need to lose, Y means you need to end the round in a draw, and Z means you need to win. Good luck!"
         if (tactic == "Y")
@@ -99,7 +99,7 @@ public class Day02
             Play me;
             if (useTactics)
             {
-                me = game.Tactic(oponent, split[1]);
+                me = Game.Tactic(oponent, split[1]);
             }
             else
             {

@@ -210,3 +210,106 @@ public class GeneralizedComparer<T> : IComparer<T> where T : IComparable
 //    }
 //    int IComparer<T>.Compare(T? x, T? y) { return inner.Compare(y, x); }
 //}
+
+public static class ArrayExt
+{
+    public static void Deconstruct<T>(this T[] srcArray, out T out0)
+    {
+        if (srcArray == null || !(srcArray.Length == 1))
+        {
+            throw new ArgumentException($"null or wrong array size {srcArray}", nameof(srcArray));
+        }
+        out0 = srcArray[0];
+    }
+
+    public static void Deconstruct<T>(this T[] srcArray, out T out0, out T out1)
+    {
+        if (srcArray == null || !(srcArray.Length == 2))
+        {
+            throw new ArgumentException($"null or wrong array size {srcArray}", nameof(srcArray));
+        }
+        out0 = srcArray[0];
+        out1 = srcArray[1];
+    }
+
+    public static void Deconstruct<T>(this T[] srcArray, out T out0, out T out1, out T out2)
+    {
+        if (srcArray == null || !(srcArray.Length == 3))
+        {
+            throw new ArgumentException($"null or wrong array size {srcArray}", nameof(srcArray));
+        }
+        out0 = srcArray[0];
+        out1 = srcArray[1];
+        out2 = srcArray[2];
+    }
+
+    public static void Deconstruct<T>(this T[] srcArray, out T out0, out T out1, out T out2, out T out3)
+    {
+        if (srcArray == null || !(srcArray.Length == 4))
+        {
+            throw new ArgumentException($"null or wrong array size {srcArray}", nameof(srcArray));
+        }
+        out0 = srcArray[0];
+        out1 = srcArray[1];
+        out2 = srcArray[2];
+        out3 = srcArray[3];
+    }
+
+    public static void Deconstruct<T>(this T[] srcArray, out T out0, out T out1, out T out2, out T out3, out T out4)
+    {
+        if (srcArray == null || !(srcArray.Length == 5))
+        {
+            throw new ArgumentException($"null or wrong array size {srcArray}", nameof(srcArray));
+        }
+        out0 = srcArray[0];
+        out1 = srcArray[1];
+        out2 = srcArray[2];
+        out3 = srcArray[3];
+        out4 = srcArray[4];
+    }
+
+    public static void Deconstruct<T>(this T[] srcArray, out T out0, out T out1, out T out2, out T out3, out T out4, out T out5)
+    {
+        if (srcArray == null || !(srcArray.Length == 6))
+        {
+            throw new ArgumentException($"null or wrong array size {srcArray}", nameof(srcArray));
+        }
+        out0 = srcArray[0];
+        out1 = srcArray[1];
+        out2 = srcArray[2];
+        out3 = srcArray[3];
+        out4 = srcArray[4];
+        out5 = srcArray[5];
+    }
+
+    public static void Deconstruct<T>(this T[] srcArray, out T out0, out T out1, out T out2, out T out3, out T out4, out T out5, out T out6)
+    {
+        if (srcArray == null || !(srcArray.Length == 7))
+        {
+            throw new ArgumentException($"null or wrong array size {srcArray}", nameof(srcArray));
+        }
+        out0 = srcArray[0];
+        out1 = srcArray[1];
+        out2 = srcArray[2];
+        out3 = srcArray[3];
+        out4 = srcArray[4];
+        out5 = srcArray[5];
+        out6 = srcArray[6];
+    }
+
+    public static void Deconstruct<T>(this T[] srcArray, out T out0, out T out1, out T out2, out T out3, out T out4, out T out5, out T out6, out T out7)
+    {
+        if (srcArray == null || !(srcArray.Length == 8))
+        {
+            throw new ArgumentException($"null or wrong array size {srcArray}", nameof(srcArray));
+        }
+        out0 = srcArray[0];
+        out1 = srcArray[1];
+        out2 = srcArray[2];
+        out3 = srcArray[3];
+        out4 = srcArray[4];
+        out5 = srcArray[5];
+        out6 = srcArray[6];
+        out7 = srcArray[7];
+    }
+}

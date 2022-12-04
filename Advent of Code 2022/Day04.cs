@@ -29,7 +29,7 @@ public partial class Day04
         var result = 0;
         foreach (var line in input)
         {
-            var split = line.Split(',');
+            var (elf1, elf2) = line.Split(',');
 
             Pos<int> GetPos(string input)
             {
@@ -38,8 +38,8 @@ public partial class Day04
                 var y = int.Parse(match.Groups[2].Value);
                 return new Pos<int>(x, y);
             }
-            Pos<int> pos1 = GetPos(split[0]);
-            Pos<int> pos2 = GetPos(split[1]);
+            Pos<int> pos1 = GetPos(elf1);
+            Pos<int> pos2 = GetPos(elf2);
 
             if (isPart1 && IsFullyContain(pos1, pos2))
             {

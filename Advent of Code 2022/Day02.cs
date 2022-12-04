@@ -94,16 +94,16 @@ public class Day02
         var game = new Game();
         foreach (var line in input)
         {
-            var split = line.Split();
-            var oponent = Game.PlayFromString(split[0]);
+            var (oponentString, meString) = line.Split();
+            var oponent = Game.PlayFromString(oponentString);
             Play me;
             if (useTactics)
             {
-                me = Game.Tactic(oponent, split[1]);
+                me = Game.Tactic(oponent, meString);
             }
             else
             {
-                me = Game.PlayFromString(split[1]);
+                me = Game.PlayFromString(meString);
             }
             game.Round(oponent, me);
         }

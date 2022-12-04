@@ -7,6 +7,9 @@ This year I aim at exploring .NET 7, C#10 and C#11
 - [What's new in C# 11](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-11)
 - [What's new in C# 10](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-10)
 
+## .NET 7 features to explore
+* [x] Regular Expression Improvements
+
 ## C# 11 features to explore
 
 * [x] Raw string literals

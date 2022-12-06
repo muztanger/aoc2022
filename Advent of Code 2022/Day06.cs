@@ -7,18 +7,18 @@ public class Day06
     private static string Calc(IEnumerable<string> input, int n)
     {
         var result = new List<int>();
-        var list = new List<char>();
-        bool AllDifferent()
+        var list = new List<char>(n + 1);
+        var set = new HashSet<char>(n);
+        bool AllDifferent(List<char> list)
         {
+            set.Clear();
             for (int i = 0; i < list.Count; i++)
             {
-                for (int j = i + 1; j < list.Count; j++)
+                if (set.Contains(list[i]))
                 {
-                    if (list[i] == list[j])
-                    {
-                        return false;
-                    }
+                    return false;
                 }
+                set.Add(list[i]);
             }
             return true;
         }
@@ -33,18 +33,13 @@ public class Day06
                 }
                 else
                 {
-                    list.Add(c);
-                    if (list.Count > n)
+                    list[i % n] = c; // order doesn't matter
+                    
+                    if (AllDifferent(list))
                     {
-                        list.RemoveAt(0);
+                        result.Add(i + 1);
+                        break;
                     }
-
-                }
-
-                if (list.Count == n  && AllDifferent())
-                {
-                    result.Add(i + 1);
-                    break;
                 }
 
                 i++;

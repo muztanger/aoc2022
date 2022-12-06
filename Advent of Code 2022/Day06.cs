@@ -3,7 +3,8 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Day06
 {
-    private static string Part1(IEnumerable<string> input)
+   
+    private static string Calc(IEnumerable<string> input, int n)
     {
         var result = new List<int>();
         var list = new List<char>();
@@ -24,57 +25,6 @@ public class Day06
         foreach (var line in input)
         {
             var i = 0;
-            foreach (var c in line)
-            {
-                if (list.Count < 4)
-                {
-                    list.Add(c);
-                }
-                else
-                {
-                    list.Add(c);
-                    if (list.Count > 4)
-                    {
-                        list.RemoveAt(0);
-                    }
-
-                }
-
-                if (list.Count == 4 && AllDifferent())
-                {
-                    Console.WriteLine(i + 1);
-                    break;
-                }
-
-                i++;
-            }
-            list.Clear();
-        }
-        return result.ToString();
-    }
-    
-    private static string Part2(IEnumerable<string> input)
-    {
-        var result = new List<int>();
-        var list = new List<char>();
-        bool AllDifferent()
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                for (int j = i + 1; j < list.Count; j++)
-                {
-                    if (list[i] == list[j])
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-        foreach (var line in input)
-        {
-            var i = 0;
-            var n = 14;
             foreach (var c in line)
             {
                 if (list.Count < n)
@@ -93,7 +43,7 @@ public class Day06
 
                 if (list.Count == n  && AllDifferent())
                 {
-                    Console.WriteLine(i + 1);
+                    result.Add(i + 1);
                     break;
                 }
 
@@ -101,7 +51,7 @@ public class Day06
             }
             list.Clear();
         }
-        return result.ToString();
+        return string.Join(",", result);
     }
 
     [TestMethod]
@@ -114,25 +64,15 @@ public class Day06
             nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg
             zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw
             """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day06_Part1_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        var result = Calc(Common.GetLines(input), 4);
+        Assert.AreEqual("7,5,6,10,11", result);
     }
     
     [TestMethod]
     public void Day06_Part1()
     {
-        var result = Part1(Common.DayInput(nameof(Day06)));
-        Assert.AreEqual("", result);
+        var result = Calc(Common.DayInput(nameof(Day06)), 4);
+        Assert.AreEqual("1140", result);
     }
     
     [TestMethod]
@@ -145,25 +85,15 @@ public class Day06
             nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg
             zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw
             """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day06_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        var result = Calc(Common.GetLines(input), 14);
+        Assert.AreEqual("19,23,23,29,26", result);
     }
     
     [TestMethod]
     public void Day06_Part2()
     {
-        var result = Part2(Common.DayInput(nameof(Day06)));
-        Assert.AreEqual("", result);
+        var result = Calc(Common.DayInput(nameof(Day06)), 14);
+        Assert.AreEqual("3495", result);
     }
     
 }

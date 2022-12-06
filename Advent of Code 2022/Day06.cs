@@ -12,13 +12,12 @@ public class Day06
         bool AllDifferent(List<char> list)
         {
             set.Clear();
-            for (int i = 0; i < list.Count; i++)
+            foreach (var x in list)
             {
-                if (set.Contains(list[i]))
+                if (!set.Add(x))
                 {
                     return false;
                 }
-                set.Add(list[i]);
             }
             return true;
         }

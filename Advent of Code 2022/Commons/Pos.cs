@@ -1,6 +1,7 @@
 ﻿namespace Advent_of_Code_2022.Commons;
 
-public class Pos<T> where T : INumber<T>
+public class Pos<T> : IEquatable<Pos<T>>
+    where T : INumber<T>
 {
     public T x;
     public T y;
@@ -54,6 +55,7 @@ public class Pos<T> where T : INumber<T>
         return T.Abs(x - inter.x) + T.Abs(y - inter.y);
     }
 
+    //TODO equals is broken!
     public bool Equals([AllowNull] Pos<T> other)
     {
         return other != null &&

@@ -5,6 +5,12 @@ namespace Advent_of_Code_2022.Commons;
 public class TestCommon
 {
     [TestMethod]
+    public void TestPos()
+    {
+        Assert.AreEqual(new Pos<int>(1,1), new Pos<int>(1,1));
+    }
+
+    [TestMethod]
     public void TestBox()
     {
         // Test Constructor

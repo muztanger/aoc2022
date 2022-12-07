@@ -70,6 +70,21 @@ public class Day07
                 child.Part1(ref nodes);
             }
         }
+
+        public void Part2(ref List<Node> nodes, long threshold)
+        {
+            nodes ??= new List<Node>();
+
+            if (TotalSize() >= threshold)
+            {
+                nodes.Add(this);
+            }
+
+            foreach (var child in _children)
+            {
+                child.Part2(ref nodes, threshold);
+            }
+        }
     }
 
     private enum State { WaitCommand, Listing };
@@ -183,13 +198,102 @@ public class Day07
 
     private static string Part2(IEnumerable<string> input)
     {
+        var directory = new List<string>();
+        var sizes = new Dictionary<string, int>();
+        var state = State.WaitCommand;
         var result = new StringBuilder();
+        Node root = new Node { Name = "", Path = "" };
+        Node current = root;
         foreach (var line in input)
         {
+            Console.WriteLine(line);
+            if (line.StartsWith("$"))
+            {
+                state = State.WaitCommand;
+            }
+
+            switch (state)
+            {
+                case State.Listing:
+                    //  - 123 abc means that the current directory contains a file named abc with size 123.
+                    //  - dir xyz means that the current directory contains a directory named xyz.
+
+                    Console.WriteLine($"Listing line={line}");
+                    var (size, name) = line.Split(' ');
+                    if (!line.StartsWith("dir"))
+                    {
+                        sizes.TryGetValue(DirectoryToString(directory), out var x);
+                        x += int.Parse(size);
+                        sizes[DirectoryToString(directory)] = x;
+                        current.AddFile(new File(name, long.Parse(size)));
+                    }
+                    else
+                    {
+                        current.AddChild(new Node { Name = name, Parent = current });
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            if (line.StartsWith("$ cd"))
+            {
+                //cd means change directory. This changes which directory is the current directory, but the specific result depends on the argument:
+                // cd x moves in one level: it looks in the current directory for the directory named x and makes it the current directory.
+                // cd..moves out one level: it finds the directory that contains the current directory, then makes that directory the current directory.
+                var (_, _, path) = line.Split();
+                Console.WriteLine("cd: " + path);
+                if (path == "/")
+                {
+                    directory.Clear();
+                    root = new Node { Name = "", Path = "" };
+                    current = root;
+                }
+                else if (path == "..")
+                {
+                    if (current.Parent != null)
+                    {
+                        current = current.Parent;
+                    }
+                    directory.RemoveAt(directory.Count - 1);
+                }
+                else
+                {
+
+                    if (current.TryGetChild(path, out var child))
+                    {
+                        current = child;
+                    }
+                    else
+                    {
+                        Assert.Fail();
+                    }
+                    directory.Add(path);
+                }
+                Console.WriteLine("directory: " + DirectoryToString(directory));
+            }
+            else if (line.StartsWith("$ ls"))
+            {
+                //ls means list.It prints out all of the files and directories immediately contained by the current directory:
+                //
+                state = State.Listing;
+            }
         }
-        return result.ToString();
+        var nodes = new List<Node>();
+        //root.Part1(ref nodes);
+        root.Part2(ref nodes, 30000000L - ( 70000000L - root.TotalSize()));
+        Console.WriteLine("Nodes: " + string.Join(",", nodes));
+        foreach (var node in nodes)
+        {
+            if (result.Length > 0)
+            {
+                result.AppendLine();
+            }
+            result.Append($"{node.FullName}: {node.TotalSize()}");
+        }
+        return nodes.OrderBy(x => x.TotalSize()).First().TotalSize().ToString();
     }
-    
+
     [TestMethod]
     public void Day07_Part1_Example01()
     {
@@ -223,16 +327,6 @@ public class Day07
     }
     
     [TestMethod]
-    public void Day07_Part1_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
     public void Day07_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day07)));
@@ -243,7 +337,29 @@ public class Day07
     public void Day07_Part2_Example01()
     {
         var input = """
-            <TODO>
+            $ cd /
+            $ ls
+            dir a
+            14848514 b.txt
+            8504156 c.dat
+            dir d
+            $ cd a
+            $ ls
+            dir e
+            29116 f
+            2557 g
+            62596 h.lst
+            $ cd e
+            $ ls
+            584 i
+            $ cd ..
+            $ cd ..
+            $ cd d
+            $ ls
+            4060174 j
+            8033020 d.log
+            5626152 d.ext
+            7214296 k
             """;
         var result = Part2(Common.GetLines(input));
         Assert.AreEqual("", result);

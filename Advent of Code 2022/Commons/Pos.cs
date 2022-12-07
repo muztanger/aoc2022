@@ -1,4 +1,6 @@
-﻿namespace Advent_of_Code_2022.Commons;
+﻿using System;
+
+namespace Advent_of_Code_2022.Commons;
 
 public class Pos<T> : IEquatable<Pos<T>>
     where T : INumber<T>
@@ -55,8 +57,19 @@ public class Pos<T> : IEquatable<Pos<T>>
         return T.Abs(x - inter.x) + T.Abs(y - inter.y);
     }
 
-    //TODO equals is broken!
-    public bool Equals([AllowNull] Pos<T> other)
+    public override bool Equals(object obj)
+    {
+        if (obj == null)
+            return false;
+
+        Pos<T> posObj = obj as Pos<T>;
+        if (posObj == null)
+            return false;
+        else
+            return Equals(posObj);
+    }
+
+    public bool Equals(Pos<T>? other)
     {
         return other != null &&
                x == other.x &&
@@ -66,6 +79,22 @@ public class Pos<T> : IEquatable<Pos<T>>
     public override int GetHashCode()
     {
         return x.GetHashCode() * 7919 + y.GetHashCode();
+    }
+
+    public static bool operator ==(Pos<T> pos1, Pos<T> pos2)
+    {
+        if (((object)pos1) == null || ((object)pos2) == null)
+            return Object.Equals(pos1, pos2);
+
+        return pos1.Equals(pos2);
+    }
+
+    public static bool operator !=(Pos<T> pos1, Pos<T> pos2)
+    {
+        if (((object)pos1) == null || ((object)pos2) == null)
+            return !Object.Equals(pos1, pos2);
+
+        return !(pos1.Equals(pos2));
     }
 
     public bool BetweenXY(T z)
@@ -92,4 +121,6 @@ public class Pos<T> : IEquatable<Pos<T>>
         var delta = p1 - this;
         return delta.x * delta.x + delta.y * delta.y;
     }
+
+
 }

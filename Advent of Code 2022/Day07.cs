@@ -9,13 +9,79 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Day07
 {
-        enum State { WaitCommand, Listing };
+    private record File(string Name, long Size);
+    
+    private record Node
+    {
+        public string Name { get; init; } = "";
+        public string Path { get; init; } = "";
+        public string FullName => $"{Path}/{Name}";
+        public long Size => Files.Sum(f => f.Size);
+        public List<File> Files { get; init; } = new List<File>();
+        public Node? Parent { get; init; } = null;
+        
+        private List<Node> _children = new List<Node>();
+
+        public void AddChild(Node node)
+        {
+            _children.Add(node);
+        }
+
+        public void AddFile(File file)
+        {
+            Files.Add(file);
+        }
+
+        public bool TryGetChild(string name, out Node? child)
+        {
+            foreach (var c in _children)
+            {
+                if (c.Name == name)
+                {
+                    child = c;
+                    return true;
+                }
+            }
+            child = null;
+            return false;
+        }
+
+        public long TotalSize()
+        {
+            var sum = Size;
+            foreach (var node in _children)
+            {
+                sum += node.TotalSize();
+            }
+            return sum;
+        }
+
+        public void Part1(ref List<Node> nodes)
+        {
+            nodes ??= new List<Node>();
+
+            if (TotalSize() <= 100000)
+            {
+                nodes.Add(this);
+            }
+
+            foreach (var child in _children)
+            {
+                child.Part1(ref nodes);
+            }
+        }
+    }
+
+    private enum State { WaitCommand, Listing };
+    
     private static string Part1(IEnumerable<string> input)
     {
         var directory = new List<string>();
         var sizes = new Dictionary<string, int>();
         var state = State.WaitCommand;
         var result = new StringBuilder();
+        Node root = new Node { Name = "", Path = "" };
+        Node current = root;
         foreach (var line in input)
         {
             Console.WriteLine(line);
@@ -27,13 +93,21 @@ public class Day07
             switch (state)
             {
                 case State.Listing:
+                    //  - 123 abc means that the current directory contains a file named abc with size 123.
+                    //  - dir xyz means that the current directory contains a directory named xyz.
+
                     Console.WriteLine($"Listing line={line}");
+                    var (size, name) = line.Split(' ');
                     if (!line.StartsWith("dir"))
                     {
-                        var (size, _) = line.Split(' ');
                         sizes.TryGetValue(DirectoryToString(directory), out var x);
                         x += int.Parse(size);
                         sizes[DirectoryToString(directory)] = x;
+                        current.AddFile(new File(name, long.Parse(size)));
+                    }
+                    else
+                    {
+                        current.AddChild(new Node { Name = name, Parent = current});
                     }
                     break;
                 default:
@@ -50,13 +124,28 @@ public class Day07
                 if (path == "/")
                 {
                     directory.Clear();
+                    root = new Node{ Name = "", Path = "" };
+                    current = root;
                 }
                 else if (path == "..")
                 {
+                    if (current.Parent != null)
+                    {
+                        current= current.Parent;
+                    }
                     directory.RemoveAt(directory.Count - 1);
                 }
                 else
                 {
+                    
+                    if (current.TryGetChild(path, out var child) )
+                    {
+                        current = child;
+                    }
+                    else
+                    {
+                        Assert.Fail();
+                    }
                     directory.Add(path);
                 }
                 Console.WriteLine("directory: " + DirectoryToString(directory));
@@ -65,23 +154,26 @@ public class Day07
             {
                 //ls means list.It prints out all of the files and directories immediately contained by the current directory:
                 //
-                //  - 123 abc means that the current directory contains a file named abc with size 123.
-                //  - dir xyz means that the current directory contains a directory named xyz.
-
-
-
                 state = State.Listing;
             }
         }
-        foreach (var kv in sizes)
+        var nodes = new List<Node>();
+        root.Part1(ref nodes);
+        Console.WriteLine("Nodes: " + string.Join(",", nodes));
+        var sum = 0L;
+        foreach (var node in nodes)
         {
-            // TODO calculate total sum per path
-            if (kv.Value < 100000)
+            if (node.TotalSize() <= 100000)
             {
-                Console.WriteLine($"{kv.Key}: {kv.Value}");
+                if (result.Length > 0)
+                {
+                    result.AppendLine();
+                }
+                result.Append($"{node.FullName}: {node.TotalSize()}");
+                sum += node.TotalSize();
             }
         }
-        return result.ToString();
+        return sum.ToString();
     }
 
     private static string DirectoryToString(List<string> directory)

@@ -62,7 +62,7 @@ public class Pos<T> : IEquatable<Pos<T>>
         if (obj == null)
             return false;
 
-        Pos<T> posObj = obj as Pos<T>;
+        Pos<T>? posObj = obj as Pos<T>;
         if (posObj == null)
             return false;
         else

@@ -57,7 +57,7 @@ public class Pos<T> : IEquatable<Pos<T>>
         return T.Abs(x - inter.x) + T.Abs(y - inter.y);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj == null)
             return false;

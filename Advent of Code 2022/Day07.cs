@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Xml.Linq;
 
@@ -61,6 +63,13 @@ public class Day07
             }
             else if (line.StartsWith("$ ls"))
             {
+                //ls means list.It prints out all of the files and directories immediately contained by the current directory:
+                //
+                //  - 123 abc means that the current directory contains a file named abc with size 123.
+                //  - dir xyz means that the current directory contains a directory named xyz.
+
+
+
                 state = State.Listing;
             }
         }

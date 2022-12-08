@@ -218,14 +218,14 @@ public class Day08
             35390
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("21", result);
     }
     
     [TestMethod]
     public void Day08_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day08)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("1684", result);
     }
     
     [TestMethod]
@@ -239,7 +239,7 @@ public class Day08
             35390
             """;
         var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("8", result);
     }
     
     [TestMethod]
@@ -249,7 +249,7 @@ public class Day08
         Assert.AreNotEqual("1135260", result);
         Assert.AreNotEqual("1500165", result);
         Assert.AreNotEqual("1054170", result);
-        Assert.AreEqual("", result);
+        Assert.AreEqual("486540", result);
     }
     
 }

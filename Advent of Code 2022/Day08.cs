@@ -95,72 +95,77 @@ public class Day08
     {
         var result = new StringBuilder();
         var visible = new List<List<Visible>>();
-        var grid = new List<List<int>>();
+        var grid = new List<List<long>>();
         foreach (var line in input)
         {
-            grid.Add(line.Select(x => int.Parse(x.ToString())).ToList());
+            grid.Add(line.Select(x => long.Parse(x.ToString())).ToList());
         }
         var N = grid[0].Count;
-        var maximest = 0;
-        for (int j = 0; j < N; j++)
+        var maximest = 0L;
+        var maxipos = new Pos<int>(int.MinValue, int.MinValue);
+        for (var j = 0; j < N; j++)
         {
-            for (int i = 0; i < N; i++)
+            for (var i = 0; i < N; i++)
             {
-                int LookRight()
+                long LookRight()
                 {
                     var x = grid[j][i];
                     var isValley = true;
                     var max = x;
-                    var count = 0;
+                    var count = 0L;
                     for (var k = i + 1; k < N; k++)
                     {
                         var y = grid[j][k];
                         CheckTrees(ref isValley, max, ref count, y);
+                        if (!isValley) break;
                         max = Math.Max(max, y);
                     }
                     return count;
                 }
 
-                int LookLeft()
+                long LookLeft()
                 {
                     var x = grid[j][i];
                     var max = x;
-                    var count = 0;
+                    var count = 0L;
                     var isValley = true;
                     for (var k = i - 1; k >= 0; k--)
                     {
                         var y = grid[j][k];
                         CheckTrees(ref isValley, max, ref count, y);
+                        if (!isValley) break;
                         max = Math.Max(max, y);
                     }
                     return count;
                 }
 
-                int LookDown()
+                long LookDown()
                 {
                     var x = grid[j][i];
                     var max = x;
-                    var count = 0;
+                    var count = 0L;
                     var isValley = true;
                     for (var k = j + 1; k < N; k++)
                     {
                         var y = grid[k][i];
                         CheckTrees(ref isValley, max, ref count, y);
+                        if (!isValley) break;
                         max = Math.Max(max, y);
                     }
                     return count;
                 }
 
-                int LookUp()
+                long LookUp()
                 {
                     var x = grid[j][i];
                     var max = x;
-                    var count = 0;
+                    var count = 0L;
                     var isValley = true;
                     for (var k = j - 1; k >= 0; k--)
                     {
                         var y = grid[k][i];
                         CheckTrees(ref isValley, max, ref count, y);
+                        if (!isValley) break;
                         max = Math.Max(max, y);
                     }
                     return count;
@@ -168,7 +173,12 @@ public class Day08
 
                 var score = LookLeft() * LookRight() * LookDown() * LookUp();
                 Console.WriteLine($"i,j={i},{j}: grid={grid[j][i]} score={score}: left={LookLeft()} * right={LookRight()} * down={LookDown()} * up={LookUp()}");
-                maximest = Math.Max(maximest, score);
+                if (score > maximest)
+                {
+                    maxipos.x = i;
+                    maxipos.y = j;
+                    maximest= score;
+                }
             }
         }
         //var sum = 0;
@@ -177,10 +187,11 @@ public class Day08
         //    sum += line.Where(x => x != Visible.None).Count();
         //    Console.WriteLine(string.Join("|", line));
         //}
+        Console.WriteLine($"maximest={maximest} maxipos={maxipos}");
         return maximest.ToString();
     }
 
-    private static void CheckTrees(ref bool isValley, int max, ref int count, int y)
+    private static void CheckTrees(ref bool isValley, long max, ref long count, long y)
     {
         if (isValley)
         {

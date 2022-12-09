@@ -323,14 +323,14 @@ public class Day07
             7214296 k
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("95437", result);
     }
     
     [TestMethod]
     public void Day07_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day07)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("1582412", result);
     }
     
     [TestMethod]
@@ -362,24 +362,14 @@ public class Day07
             7214296 k
             """;
         var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day07_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("24933642", result);
     }
     
     [TestMethod]
     public void Day07_Part2()
     {
         var result = Part2(Common.DayInput(nameof(Day07)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("3696336", result);
     }
     
 }

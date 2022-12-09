@@ -10,7 +10,7 @@ public class Day09
         var ts = Enumerable.Repeat(s, N).ToList();
         var counts = new Dictionary<Pos<int>, int>();
         counts[s] = 1;
-        var dir = new Dictionary<char, Pos<int>> { { 'R', new(1, 0) }, { 'L', new(-1, 0) }, { 'U', new(0, -1) }, { 'D', new(0, 1) } };
+        var moves = new Dictionary<char, Pos<int>> { { 'R', new(1, 0) }, { 'L', new(-1, 0) }, { 'U', new(0, -1) }, { 'D', new(0, 1) } };
         var box = new Box<int>(new Pos<int>(0, -4), new Pos<int>(4, 0));
         void Print(List<Pos<int>> ts)
         {
@@ -55,13 +55,23 @@ public class Day09
             }
             Console.WriteLine();
         }
+        var dts = new List<Pos<int>>() {
+                            new(0, 1),
+                            new(1, 0),
+                            new(1, 1),
+                            new(0, -1),
+                            new(-1, 0),
+                            new(-1, -1),
+                            new(1, -1),
+                            new(-1, 1)
+        };
         Print(ts);
         foreach (var line in input)
         {
             if (isDebug) Console.WriteLine(line);
             var (moveStr, moveCountStr) = line.Split();
             var moveCount = int.Parse(moveCountStr);
-            var move = dir[moveStr[0]];
+            var move = moves[moveStr[0]];
             for (int i = 0; i < moveCount; i++)
             {
                 ts[0] += move;
@@ -72,16 +82,7 @@ public class Day09
                     if (!t.Adjacent(h))
                     {
                         var candidates = new List<(int, Pos<int>)>();
-                        foreach (var dt in new List<Pos<int>>() {
-                            new(0, 1),
-                            new(1, 0),
-                            new(1, 1),
-                            new(0, -1),
-                            new(-1, 0),
-                            new(-1, -1),
-                            new(1, -1),
-                            new(-1, 1),
-                        })
+                        foreach (var dt in dts)
                         {
                             var nt = t + dt;
                             if (nt.Adjacent(h))

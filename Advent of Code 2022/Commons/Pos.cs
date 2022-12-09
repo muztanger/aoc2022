@@ -122,5 +122,12 @@ public class Pos<T> : IEquatable<Pos<T>>
         return delta.x * delta.x + delta.y * delta.y;
     }
 
+    internal bool Adjacent(Pos<T> other)
+    {
+        var dp = this - other;
+        var x = T.Abs(dp.x);
+        var y = T.Abs(dp.y);
+        return y <= T.One && x <= T.One;
+    }
 
 }

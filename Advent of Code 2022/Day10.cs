@@ -9,15 +9,16 @@ public class Day10
     {
         const int Width = 40;
         const int Height = 6;
-        List<int> _screen = Enumerable.Repeat(0, Width * Height).ToList();
+        readonly List<int> _screen = Enumerable.Repeat(0, Width * Height).ToList();
 
-        public void Draw(long x, long cycle)
+        public void Draw(Cpu cpu)
         {
-            int i = (int) (cycle - 1) % Width;
-            int pos = (int) x;
+            int cycleIndex = (int)(cpu.Cycle - 1);
+            int i =  cycleIndex % Width;
+            int pos = (int) cpu.X;
             if (i >= pos - 1  && i <= pos + 1)
             {
-                _screen[(int) (cycle - 1)] = 1;
+                _screen[cycleIndex] = 1;
             }
         }
 
@@ -44,35 +45,30 @@ public class Day10
         }
     }
 
-    class Cpu
+    public class Cpu
     {
-        public long Cycle => _cycle;
-        public long X => _registerX;
-        public long SignalStrength => _cycle * _registerX;
+        public long Cycle { get; private set; } = 0L;
+        public long X { get; private set; } = 1L;
+        public long SignalStrength => Cycle * X;
 
         private List<(Command, long)> _program = new();
-        private long _registerX = 1L;
         private int _cyclesLeft = 0;
         private int _programPointer = -1;
-        private long _cycle = 0L;
-        private bool isDebug = true;
 
         public bool StartCycle()
         {
-            _cycle++;
             if (_cyclesLeft == 0)
             {
                 _programPointer++;
                 if (_programPointer >= _program.Count)
                 {
-                    _cycle--;
                     return false;
                 }
                 if (_program[_programPointer].Item1 == Command.Addx)
                 {
                     _cyclesLeft = 1;
                 }
-                else // noop
+                else if (_program[_programPointer].Item1 == Command.Noop)
                 {
                     _cyclesLeft = 0;
                 }
@@ -81,6 +77,7 @@ public class Day10
             {
                 _cyclesLeft--;
             }
+            Cycle++;
             return true;
         }
 
@@ -88,7 +85,7 @@ public class Day10
         {
             if (_program[_programPointer].Item1 == Command.Addx && _cyclesLeft == 0)
             {
-                _registerX += _program[_programPointer].Item2;
+                X += _program[_programPointer].Item2;
             }
         }
 
@@ -120,7 +117,6 @@ public class Day10
         {
             if (checks.Contains(cpu.Cycle))
             {
-                Console.WriteLine($"Cycle={cpu.Cycle} X={cpu.X} SignalStrength={cpu.SignalStrength}");
                 signals.Add(cpu.SignalStrength);
                 if (signals.Count == checks.Count)
                 {
@@ -129,8 +125,6 @@ public class Day10
             }
             cpu.EndCycle();
         }
-        //Console.WriteLine($"Cycle={cpu.Cycle} X={cpu.X} SignalStrength={cpu.SignalStrength}");
-
         return signals.Sum().ToString();
     }
     
@@ -138,35 +132,14 @@ public class Day10
     {
         var crt = new Crt();
         var cpu = Cpu.Load(input);
-        //PrintSpritePosition(cpu);
         while (cpu.StartCycle())
         {
-            //Console.WriteLine($"Start cycle  {cpu.Cycle,2}:");
-            crt.Draw(cpu.X, (int)cpu.Cycle);
-            //Console.WriteLine("Current CRT row: " + crt.ToString().Split()[0]);
+            crt.Draw(cpu);
             cpu.EndCycle();
-            //PrintSpritePosition(cpu);
-            Console.WriteLine();
         }
         return crt.ToString();
     }
 
-    private static void PrintSpritePosition(Cpu cpu)
-    {
-        var spritePosLine = new StringBuilder();
-        for (int i = 0; i < 40; i++)
-        {
-            if (cpu.X >= i - 1 && cpu.X <= i + 1)
-            {
-                spritePosLine.Append('#');
-            }
-            else
-            {
-                spritePosLine.Append('.');
-            }
-        }
-        Console.WriteLine($"Sprite position: [{cpu.X,2}] " + spritePosLine.ToString());
-    }
 
     [TestMethod]
     public void Day10_Part1_Example01()

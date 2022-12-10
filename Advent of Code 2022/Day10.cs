@@ -1,5 +1,3 @@
-using System.Linq;
-
 namespace Advent_of_Code_2022;
 
 enum Command { Addx, Noop };
@@ -140,21 +138,20 @@ public class Day10
     {
         var crt = new Crt();
         var cpu = Cpu.Load(input);
-        PrintSpritPosition(cpu);
-        Console.WriteLine();
+        //PrintSpritePosition(cpu);
         while (cpu.StartCycle())
         {
-            Console.WriteLine($"Start cycle  {cpu.Cycle,2}:");
+            //Console.WriteLine($"Start cycle  {cpu.Cycle,2}:");
             crt.Draw(cpu.X, (int)cpu.Cycle);
-            Console.WriteLine("Current CRT row: " + crt.ToString().Split()[0]);
+            //Console.WriteLine("Current CRT row: " + crt.ToString().Split()[0]);
             cpu.EndCycle();
-            PrintSpritPosition(cpu);
+            //PrintSpritePosition(cpu);
             Console.WriteLine();
         }
         return crt.ToString();
     }
 
-    private static void PrintSpritPosition(Cpu cpu)
+    private static void PrintSpritePosition(Cpu cpu)
     {
         var spritePosLine = new StringBuilder();
         for (int i = 0; i < 40; i++)
@@ -168,7 +165,7 @@ public class Day10
                 spritePosLine.Append('.');
             }
         }
-        Console.WriteLine($"Sprite position: [{cpu.X}] " + spritePosLine.ToString());
+        Console.WriteLine($"Sprite position: [{cpu.X,2}] " + spritePosLine.ToString());
     }
 
     [TestMethod]
@@ -180,7 +177,7 @@ public class Day10
             addx -5
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("0", result); // Not really a test...
     }
     
     [TestMethod]
@@ -335,14 +332,14 @@ public class Day10
             noop
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("13140", result);
     }
     
     [TestMethod]
     public void Day10_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day10)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("14340", result);
     }
     
     [TestMethod]
@@ -497,24 +494,30 @@ public class Day10
             noop
             """;
         var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day10_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("""
+            ##..##..##..##..##..##..##..##..##..##..
+            ###...###...###...###...###...###...###.
+            ####....####....####....####....####....
+            #####.....#####.....#####.....#####.....
+            ######......######......######......####
+            #######.......#######.......#######.....
+
+            """, result);
     }
     
     [TestMethod]
     public void Day10_Part2()
     {
         var result = Part2(Common.DayInput(nameof(Day10)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("""
+            ###...##..###....##..##..###..#..#.###..
+            #..#.#..#.#..#....#.#..#.#..#.#..#.#..#.
+            #..#.#..#.#..#....#.#....###..####.#..#.
+            ###..####.###.....#.#....#..#.#..#.###..
+            #....#..#.#....#..#.#..#.#..#.#..#.#....
+            #....#..#.#.....##...##..###..#..#.#....
+            
+            """, result);
     }
     
 }

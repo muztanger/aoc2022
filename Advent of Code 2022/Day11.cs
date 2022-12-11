@@ -9,7 +9,7 @@ public class Day11
     private static string Part1(IEnumerable<string> input)
     {
         var monkeys = Monkey.Parse(input);
-        var game = new Game(monkeys);
+        var game = new Game(monkeys, 0);
         Console.WriteLine(game);
         Console.WriteLine();
         for (int round = 1; round <= 20; round++)
@@ -23,30 +23,28 @@ public class Day11
             }
         }
 
-        var monkeyBusiness = new List<BigInteger>();
         for (int i = 0; i < monkeys.Count; i++)
         {
             //Monkey 0 inspected items 101 times.
             Console.WriteLine($"Monkey {i} inspected items {monkeys[i].Inspections} times.");
-            monkeyBusiness.Add(monkeys[i].Inspections);
         }
-
-        return monkeyBusiness.OrderByDescending(x => x).Take(2).Aggregate(BigInteger.One, (a, b) => a * b).ToString();
+        return monkeys.Select(x => x.Inspections).OrderByDescending(x => x).Take(2).Aggregate(BigInteger.One, (a, b) => a * b).ToString();
     }
 
     private static string Part2(IEnumerable<string> input)
     {
         var monkeys = Monkey.Parse(input);
-        var game = new Game(monkeys);
+        var maxTest = monkeys.Select(x => x.TestValue).Aggregate(BigInteger.One, (a, b) => a * b);
+        var game = new Game(monkeys, maxTest);
         Console.WriteLine(game);
         Console.WriteLine();
         var check = new List<int> { 1, 20, 1000, 2000, 3000, 7000, 9000, 10000 };
-        for (int round = 1; round <= 20; round++)
+        for (int round = 1; round <= 10000; round++)
         {
             game.Round(canRelax: false);
             if (check.Contains(round))
             {
-                //Console.WriteLine($"After round: {round}");
+                Console.WriteLine($"After round: {round}");
                 //Console.WriteLine(game);
                 for (int i = 0; i < monkeys.Count; i++)
                 {
@@ -62,7 +60,7 @@ public class Day11
 
     public class Monkey
     {
-        private BigInteger _testVal;
+        public BigInteger TestValue { get; private set; }
         private int _trueAction;
         private int _falseAction;
 
@@ -72,7 +70,7 @@ public class Day11
         public BigInteger? OpRight { get; private set; } = null;
         public BigInteger Inspections { get; private set; } = 0L;
 
-        public List<(BigInteger, int)> Turn(bool canRelax = true)
+        public List<(BigInteger, int)> Turn(bool canRelax, BigInteger maxTest)
         {
             var throws = new List<(BigInteger, int)>();
             for (int i = 0; i < StartingItems.Count; i++)
@@ -91,11 +89,11 @@ public class Day11
                     right = OpRight.Value;
                 }
 
-                //if (!canRelax)
-                //{
-                //    left %= _testVal;
-                //    right %= _testVal;
-                //}
+                if (!canRelax)
+                {
+                    left %= maxTest;
+                    right %= maxTest;
+                }
 
                 if (Op == '+')
                 {
@@ -117,11 +115,11 @@ public class Day11
                 }
                 else
                 {
-                    //StartingItems[i] %= _testVal;
+                    StartingItems[i] %= maxTest;
                 }
 
                 // throw
-                var throwTo = StartingItems[i] % _testVal == 0 ? _trueAction : _falseAction;
+                var throwTo = StartingItems[i] % TestValue == 0 ? _trueAction : _falseAction;
                 throws.Add((StartingItems[i], throwTo));
             }
             StartingItems = new();
@@ -170,7 +168,7 @@ public class Day11
                     }
                     else if (trimmedLine.StartsWith("Test:"))
                     {
-                        monkey._testVal = BigInteger.Parse(trimmedLine.Split().Last());
+                        monkey.TestValue = BigInteger.Parse(trimmedLine.Split().Last());
                     }
                     else if (trimmedLine.StartsWith("If true:"))
                     {
@@ -193,17 +191,19 @@ public class Day11
     class Game
     {
         private readonly List<Monkey> _monkeys;
+        private readonly BigInteger _maxTest;
 
-        public Game(List<Monkey> monkeys)
+        public Game(List<Monkey> monkeys, BigInteger maxTest)
         {
             this._monkeys = monkeys;
+            this._maxTest = maxTest;
         }
 
         public void Round(bool canRelax = true)
         {
             for (int monkey = 0; monkey < _monkeys.Count; monkey++)
             {
-                var throws = _monkeys[monkey].Turn(canRelax);
+                var throws = _monkeys[monkey].Turn(canRelax, _maxTest);
                 foreach (var t in throws)
                 {
                     _monkeys[t.Item2].Receive(t.Item1);
@@ -276,7 +276,7 @@ public class Day11
     public void Day11_Part2_Example01()
     {
         var result = Part2(Common.GetLines(_example));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("2713310158", result);
     }
     
     [TestMethod]

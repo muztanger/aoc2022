@@ -127,6 +127,7 @@ public class Day12
             distList.Add(row);
         }
         
+        // Dijkstra's algorithm
         var dist = new Grid(distList);
         var q = new PriorityQueue<Pos<int>, int>();
         var processed = new HashSet<Pos<int>>();
@@ -148,12 +149,6 @@ public class Day12
                 }
             }
         }
-
-
-
-        //var path = new LinkedList<Pos<int>>();
-        //path.AddLast(start);
-        //var z = ShortestPath(gridList, start, end, ref path);
 
         return dist[end].ToString();
     }

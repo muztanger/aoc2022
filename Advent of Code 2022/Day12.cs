@@ -5,17 +5,40 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Day12
 {
+    public class Grid
+    {
+        readonly List<List<int>> _gridList;
+        readonly Box<int> _gridBorders;
+        public Grid(List<List<int>> grid)
+        {
+            _gridList = grid;
+            _gridBorders = new Box<int>(new(0, 0), new(grid.First().Count, grid.Count));
+        }
+
+        public int this[Pos<int> p]
+        {
+            get => _gridList[p.y][p.x];
+            set { _gridList[p.y][p.x] = value; }
+        }
+        public bool IsInside(Pos<int> p)
+        {
+            return _gridBorders.IsInside(p);
+        }
+    }
+
     private static string Part1(IEnumerable<string> input)
     {
         var result = new StringBuilder();
-        var grid = new List<List<int>>();
+        var gridList = new List<List<int>>();
         var start = new Pos<int>(0, 0);
         var end = new Pos<int>(0, 0);
         var y = 0;
         foreach (var line in input)
         {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
             List<int> row = new List<int>();
-            grid.Add(row);
+            gridList.Add(row);
             var x = 0;
             foreach (var c in line)
             {
@@ -37,18 +60,35 @@ public class Day12
             }
             y++;
         }
+        var grid = new Grid(gridList);
 
-        List<Pos<int>> path = new List<Pos<int>>();
-        List<List<bool>> visited = Enumerable.Repeat(Enumerable.Repeat(false, grid.First().Count).ToList(), grid.Count).ToList();
-        var z = ShortestPath(grid, start, end, ref path, ref visited);
+        PrintGrid(gridList, start, end);
+        var adjecent = new Dictionary<Pos<int>, List<Pos<int>>>();
+        foreach (var p in grid)
+        {
 
-        PrintGrid(grid, start, end);
+        }
 
-        return z.ToString();
+
+        var dist = new Grid(Enumerable.Repeat(Enumerable.Repeat(int.MaxValue, gridList.First().Count).ToList(), gridList.Count).ToList());
+        var q = new PriorityQueue<Pos<int>, int>();
+        var processed = new HashSet<Pos<int>>();
+        q.Enqueue(start, 0);
+        while (q.TryDequeue(out var p, out var priority))
+        {
+            if (processed.Contains(p)) continue;
+            processed.Add(p);
+            adjecent[p]
+        }
+        var path = new LinkedList<Pos<int>>();
+        path.AddLast(start);
+        var z = ShortestPath(gridList, start, end, ref path);
+
+        return (z - 1).ToString();
     }
 
-    private static List<Pos<int>> walks = new List<Pos<int>> { new(0, 1), new(0, 1), new(-1, 0), new(0, -1) };
-    private static int ShortestPath(List<List<int>> grid, Pos<int> start, Pos<int> end, ref List<Pos<int>> path, ref List<List<bool>> visited)
+    private static readonly List<Pos<int>> walks = new List<Pos<int>> { new(1, 0), new(0, 1), new(-1, 0), new(0, -1) };
+    private static int ShortestPath(List<List<int>> grid, Pos<int> start, Pos<int> end, ref LinkedList<Pos<int>> path)
     {
         if (start == end)
         {
@@ -61,12 +101,12 @@ public class Day12
             var p = start + dp;
             if (p.x >= 0 && p.x < grid.First().Count && p.y >= 0 && p.y < grid.Count)
             {
-                if (!visited[p.y][p.x] && grid[start.y][start.x] - grid[p.y][p.x] >= -1)
+                if (!path.Contains(p) && grid[start.y][start.x] - grid[p.y][p.x] >= -1)
                 {
-                    //visited[p.y][p.x] = true;
-                    var pPath = new List<Pos<int>>(path);
-                    pPath.Add(p);
-                    min = Math.Min(min, ShortestPath(grid, p, end, ref pPath, ref visited));
+                    //var pPath = new List<Pos<int>>(path);
+                    path.AddLast(p);
+                    min = Math.Min(min, ShortestPath(grid, p, end, ref path));
+                    path.RemoveLast();
                 }
             }
         }
@@ -123,19 +163,9 @@ public class Day12
             abdefghi
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual(input, result);
+        Assert.AreEqual("31", result);
     }
-    
-    [TestMethod]
-    public void Day12_Part1_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
+
     [TestMethod]
     public void Day12_Part1()
     {

@@ -5,14 +5,15 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Day12
 {
-    public class Grid
+    public class Grid: IEnumerator, IEnumerable
     {
         readonly List<List<int>> _gridList;
         readonly Box<int> _gridBorders;
+        Pos<int> _index = new(-1, 0);
         public Grid(List<List<int>> grid)
         {
             _gridList = grid;
-            _gridBorders = new Box<int>(new(0, 0), new(grid.First().Count, grid.Count));
+            _gridBorders = new Box<int>(new(0, 0), new(grid.First().Count - 1, grid.Count - 1));
         }
 
         public int this[Pos<int> p]
@@ -20,9 +21,37 @@ public class Day12
             get => _gridList[p.y][p.x];
             set { _gridList[p.y][p.x] = value; }
         }
+
+        public object Current => this[_index];
+
+        public IEnumerator GetEnumerator()
+        {
+            return (IEnumerator) this;
+        }
+
         public bool IsInside(Pos<int> p)
         {
             return _gridBorders.IsInside(p);
+        }
+
+        public bool MoveNext()
+        {
+            _index.x++;
+            if (!_gridBorders.IsInside(_index))
+            {
+                _index.x = 0;
+                _index.y++;
+            }
+            if (!_gridBorders.IsInside(_index))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public void Reset()
+        {
+            _index = new(-1, 0);
         }
     }
 
@@ -64,27 +93,69 @@ public class Day12
 
         PrintGrid(gridList, start, end);
         var adjecent = new Dictionary<Pos<int>, List<Pos<int>>>();
-        foreach (var p in grid)
+        for (y = 0 ; y < gridList.Count; y++)
         {
-
+            for (int x = 0; x < gridList.First().Count; x++)
+            {
+                var p = new Pos<int>(x, y);
+                foreach (var dp in walks)
+                {
+                    var next = p + dp;
+                    if (grid.IsInside(next) && grid[next] - 1 <= grid[p])
+                    {
+                        if (adjecent.TryGetValue(p, out var values))
+                        {
+                            adjecent[p].Add(next);
+                        }
+                        else
+                        {
+                            adjecent[p] = new() { next };
+                        }
+                    }
+                }
+            }
         }
 
-
-        var dist = new Grid(Enumerable.Repeat(Enumerable.Repeat(int.MaxValue, gridList.First().Count).ToList(), gridList.Count).ToList());
+        var distList = new List<List<int>>();
+        for (y = 0; y < gridList.Count; y++)
+        {
+            List<int> row = new();
+            for (int x = 0; x < gridList.First().Count; x++)
+            {
+                row.Add(int.MaxValue / 2);
+            }
+            distList.Add(row);
+        }
+        
+        var dist = new Grid(distList);
         var q = new PriorityQueue<Pos<int>, int>();
         var processed = new HashSet<Pos<int>>();
+        dist[start] = 0;
         q.Enqueue(start, 0);
-        while (q.TryDequeue(out var p, out var priority))
+        while (q.TryDequeue(out var a, out var priority))
         {
-            if (processed.Contains(p)) continue;
-            processed.Add(p);
-            adjecent[p]
+            if (processed.Contains(a)) continue;
+            processed.Add(a);
+            if (adjecent.ContainsKey(a))
+            {
+                foreach (var b in adjecent[a])
+                {
+                    if (dist[a] + 1 < dist[b])
+                    {
+                        dist[b] = dist[a] + 1;
+                        q.Enqueue(b, dist[b]);
+                    }
+                }
+            }
         }
-        var path = new LinkedList<Pos<int>>();
-        path.AddLast(start);
-        var z = ShortestPath(gridList, start, end, ref path);
 
-        return (z - 1).ToString();
+
+
+        //var path = new LinkedList<Pos<int>>();
+        //path.AddLast(start);
+        //var z = ShortestPath(gridList, start, end, ref path);
+
+        return dist[end].ToString();
     }
 
     private static readonly List<Pos<int>> walks = new List<Pos<int>> { new(1, 0), new(0, 1), new(-1, 0), new(0, -1) };

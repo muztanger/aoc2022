@@ -93,7 +93,7 @@ public class Day12
 
         PrintGrid(gridList, start, end);
         var adjecent = new Dictionary<Pos<int>, List<Pos<int>>>();
-        for (y = 0 ; y < gridList.Count; y++)
+        for (y = 0; y < gridList.Count; y++)
         {
             for (int x = 0; x < gridList.First().Count; x++)
             {
@@ -116,8 +116,14 @@ public class Day12
             }
         }
 
+        return Dijkstra(gridList, start, end, adjecent);
+    }
+
+    // Dijkstra's algorithm
+    private static string Dijkstra(List<List<int>> gridList, Pos<int> start, Pos<int> end, Dictionary<Pos<int>, List<Pos<int>>> adjecent)
+    {
         var distList = new List<List<int>>();
-        for (y = 0; y < gridList.Count; y++)
+        for (int y = 0; y < gridList.Count; y++)
         {
             List<int> row = new();
             for (int x = 0; x < gridList.First().Count; x++)
@@ -126,8 +132,7 @@ public class Day12
             }
             distList.Add(row);
         }
-        
-        // Dijkstra's algorithm
+
         var dist = new Grid(distList);
         var q = new PriorityQueue<Pos<int>, int>();
         var processed = new HashSet<Pos<int>>();
@@ -154,31 +159,6 @@ public class Day12
     }
 
     private static readonly List<Pos<int>> walks = new List<Pos<int>> { new(1, 0), new(0, 1), new(-1, 0), new(0, -1) };
-    private static int ShortestPath(List<List<int>> grid, Pos<int> start, Pos<int> end, ref LinkedList<Pos<int>> path)
-    {
-        if (start == end)
-        {
-            return path.Count;
-        }
-
-        var min = int.MaxValue;
-        foreach (var dp in walks)
-        {
-            var p = start + dp;
-            if (p.x >= 0 && p.x < grid.First().Count && p.y >= 0 && p.y < grid.Count)
-            {
-                if (!path.Contains(p) && grid[start.y][start.x] - grid[p.y][p.x] >= -1)
-                {
-                    //var pPath = new List<Pos<int>>(path);
-                    path.AddLast(p);
-                    min = Math.Min(min, ShortestPath(grid, p, end, ref path));
-                    path.RemoveLast();
-                }
-            }
-        }
-        return min;
-    }
-
     private static void PrintGrid(List<List<int>> grid, Pos<int> start, Pos<int> end)
     {
         int y;
@@ -215,9 +195,69 @@ public class Day12
 
     private static string Part2(IEnumerable<string> input)
     {
-        return "EEK";
+        var result = new StringBuilder();
+        var gridList = new List<List<int>>();
+        var start = new Pos<int>(0, 0);
+        var end = new Pos<int>(0, 0);
+        var y = 0;
+        foreach (var line in input)
+        {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            List<int> row = new List<int>();
+            gridList.Add(row);
+            var x = 0;
+            foreach (var c in line)
+            {
+                if (c == 'S') // startPos
+                {
+                    start = new Pos<int>(x, y);
+                    row.Add(0);
+                }
+                else if (c == 'E') // endPos
+                {
+                    end = new Pos<int>(x, y);
+                    row.Add('z' - 'a');
+                }
+                else
+                {
+                    row.Add(c - 'a');
+                }
+                x++;
+            }
+            y++;
+        }
+        var grid = new Grid(gridList);
+
+        PrintGrid(gridList, start, end);
+        var adjecent = new Dictionary<Pos<int>, List<Pos<int>>>();
+        for (y = 0; y < gridList.Count; y++)
+        {
+            for (int x = 0; x < gridList.First().Count; x++)
+            {
+                var p = new Pos<int>(x, y);
+                foreach (var dp in walks)
+                {
+                    var next = p + dp;
+                    if (grid.IsInside(next) && grid[next] - 1 <= grid[p])
+                    {
+                        if (adjecent.TryGetValue(p, out var values))
+                        {
+                            adjecent[p].Add(next);
+                        }
+                        else
+                        {
+                            adjecent[p] = new() { next };
+                        }
+                    }
+                }
+            }
+        }
+
+        //TODO find all starts and do dijstra for each
+        return Dijkstra(gridList, start, end, adjecent);
     }
-    
+
     [TestMethod]
     public void Day12_Part1_Example01()
     {
@@ -236,7 +276,7 @@ public class Day12
     public void Day12_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day12)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("383", result);
     }
     
     [TestMethod]

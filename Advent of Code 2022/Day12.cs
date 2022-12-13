@@ -116,11 +116,11 @@ public class Day12
             }
         }
 
-        return Dijkstra(gridList, start, end, adjecent);
+        return Dijkstra(gridList, start, end, adjecent).ToString();
     }
 
     // Dijkstra's algorithm
-    private static string Dijkstra(List<List<int>> gridList, Pos<int> start, Pos<int> end, Dictionary<Pos<int>, List<Pos<int>>> adjecent)
+    private static int Dijkstra(List<List<int>> gridList, Pos<int> start, Pos<int> end, Dictionary<Pos<int>, List<Pos<int>>> adjecent)
     {
         var distList = new List<List<int>>();
         for (int y = 0; y < gridList.Count; y++)
@@ -155,7 +155,7 @@ public class Day12
             }
         }
 
-        return dist[end].ToString();
+        return dist[end];
     }
 
     private static readonly List<Pos<int>> walks = new List<Pos<int>> { new(1, 0), new(0, 1), new(-1, 0), new(0, -1) };
@@ -197,7 +197,7 @@ public class Day12
     {
         var result = new StringBuilder();
         var gridList = new List<List<int>>();
-        var start = new Pos<int>(0, 0);
+        var startList = new List<Pos<int>>();
         var end = new Pos<int>(0, 0);
         var y = 0;
         foreach (var line in input)
@@ -209,9 +209,10 @@ public class Day12
             var x = 0;
             foreach (var c in line)
             {
-                if (c == 'S') // startPos
+                if (c == 'S' || c == 'a') // startPos
                 {
-                    start = new Pos<int>(x, y);
+
+                    startList.Add(new Pos<int>(x, y));
                     row.Add(0);
                 }
                 else if (c == 'E') // endPos
@@ -229,7 +230,7 @@ public class Day12
         }
         var grid = new Grid(gridList);
 
-        PrintGrid(gridList, start, end);
+        //PrintGrid(gridList, start, end);
         var adjecent = new Dictionary<Pos<int>, List<Pos<int>>>();
         for (y = 0; y < gridList.Count; y++)
         {
@@ -254,8 +255,12 @@ public class Day12
             }
         }
 
-        //TODO find all starts and do dijstra for each
-        return Dijkstra(gridList, start, end, adjecent);
+        var min = int.MaxValue;
+        foreach (var start in startList)
+        {
+            min = Math.Min(min, Dijkstra(gridList, start, end, adjecent));
+        }
+        return min.ToString();
     }
 
     [TestMethod]
@@ -283,7 +288,11 @@ public class Day12
     public void Day12_Part2_Example01()
     {
         var input = """
-            <TODO>
+            Sabqponm
+            abcryxxl
+            accszExk
+            acctuvwj
+            abdefghi
             """;
         var result = Part2(Common.GetLines(input));
         Assert.AreEqual("", result);

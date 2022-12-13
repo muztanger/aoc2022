@@ -2,6 +2,7 @@ using System.ComponentModel;
 
 namespace Advent_of_Code_2022;
 
+enum Order { Right, NotRight, Continue };
 
 [TestClass]
 public class Day13
@@ -40,8 +41,8 @@ public class Day13
 
     private static string Part1(IEnumerable<string> input)
     {
-        var result = new StringBuilder();
-        
+        var result = new List<int>();
+        var pair = new Item[2];
         var index = 0;
         foreach (var line in input)
         {
@@ -100,18 +101,84 @@ public class Day13
                         break;
                 }
             }
-            if (current.Parent is ListItem parentWithList)
-            {
-                parentWithList.Items.Add(current);
-            }
+            root = current;
 
-            //lists[index % 2] = 
+            pair[index % 2] = root;
+
+            if (index > 0 && index % 2 == 1)
+            {
+                // Compare!
+                Console.WriteLine($"== Pair {index / 2 + 1} ==");
+                Order value = Compare(pair[0], pair[1]);
+                Console.WriteLine(value);
+                if (value == Order.Right)
+                {
+                    result.Add(index / 2 + 1);
+                }
+            }
 
             index++;    
         }
-        return result.ToString();
+        return result.Sum().ToString();
     }
-    
+
+    private static Order Compare(Item c1, Item c2)
+    {
+        if (c1 is IntItem i1 && c2 is IntItem i2)
+        {
+            if (i1.X > i2.X)
+            {
+                return Order.NotRight;
+            }
+            else if (i1.X < i2.X)
+            {
+                return Order.Right;
+            }
+            else
+            {
+                return Order.Continue;
+            }
+        }
+        else if (c1 is IntItem && c2 is ListItem)
+        {
+            var l1 = new ListItem { Items = new() { c1 } };
+            Order compare = Compare(l1, c2);
+            if (compare != Order.Continue)
+            {
+                return compare;
+            }
+        }
+        else if (c1 is ListItem && c2 is IntItem)
+        {
+            var l2 = new ListItem { Items = new() { c2 } };
+            Order compare = Compare(c1, l2);
+            if (compare != Order.Continue)
+            {
+                return compare;
+            }
+        }
+        else if (c1 is ListItem l1 && c2 is ListItem l2)
+        {
+            for (int i = 0; i < Math.Min(l1.Items.Count, l2.Items.Count); i++)
+            {
+                var compare = Compare(l1.Items[i], l2.Items[i]);
+                if (compare != Order.Continue)
+                {
+                    return compare;
+                }
+            }
+            if (l1.Items.Count > l2.Items.Count)
+            {
+                return Order.NotRight;
+            }
+            else if (l1.Items.Count < l2.Items.Count)
+            {
+                return Order.Right;
+            }
+        }
+        return Order.Continue;
+    }
+
     private static string Part2(IEnumerable<string> input)
     {
         var result = new StringBuilder();

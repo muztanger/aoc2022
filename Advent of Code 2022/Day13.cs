@@ -9,38 +9,6 @@ enum Order { Right, NotRight, Continue };
 [TestClass]
 public class Day13
 {
-    
-    public class Item
-    {
-        public Item? Parent { get; set; } = null;
-
-        public Item(Item? parent = null)
-        {
-            Parent = parent;
-        }
-    }
-
-    public class IntItem : Item
-    {
-        public int X { get; set; } = -1;
-        public IntItem() { }
-        public override string ToString()
-        {
-            return X.ToString();
-        }
-    }
-
-    public class ListItem : Item
-    {
-        public List<Item> Items { get; set; } = new();
-        public ListItem() { }
-
-        public override string ToString()
-        {
-            return $"[{string.Join(", ", Items)}]";
-        }
-    }
-
     private static string Part1(IEnumerable<string> input)
     {
         var result = new List<int>();
@@ -130,13 +98,54 @@ public class Day13
         return Order.Continue;
     }
 
+
+    class JsonElementComparer : IComparer<JsonElement>
+    {
+        public int Compare(JsonElement x, JsonElement y)
+        {
+            var result = Day13.Compare(x, y);
+            return result switch
+            {
+                Order.Continue => 0,
+                Order.Right => -1,
+                Order.NotRight => 1,
+                _ => throw new NotImplementedException(),
+            };
+        }
+    }
+
     private static string Part2(IEnumerable<string> input)
     {
-        var result = new StringBuilder();
+        var list = new List<JsonElement>();
         foreach (var line in input)
         {
+            if (string.IsNullOrWhiteSpace(line)) continue;
+            list.Add(JsonDocument.Parse(line).RootElement);       
         }
-        return result.ToString();
+
+        const string divider1 = "[[2]]";
+        list.Add(JsonDocument.Parse(divider1).RootElement);
+        
+        const string divider2 = "[[6]]";
+        list.Add(JsonDocument.Parse(divider2).RootElement);
+
+        list.Sort(new JsonElementComparer());
+        var index = 1;
+        var distressSignal = 1;
+        foreach (var elem in list)
+        {
+            if (elem.GetRawText().Equals(divider1))
+            {
+                distressSignal *= index;
+            }
+            else if (elem.GetRawText().Equals(divider2))
+            {
+                distressSignal *= index;
+            }
+            index++;
+        }
+
+        return distressSignal.ToString();
     }
     
     [TestMethod]
@@ -168,7 +177,7 @@ public class Day13
             [1,[2,[3,[4,[5,6,0]]]],8,9]
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("13", result);
     }
     
     [TestMethod]
@@ -179,41 +188,53 @@ public class Day13
             [[[],2,[],1,[4,1]],[3,[[8,4,0,7,8],4,2]],[[9,[2,1,8,2],[6,0,3,1,1]],4],[10,2,2]]
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("0", result);
     }
     
     [TestMethod]
     public void Day13_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day13)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("5659", result);
     }
     
     [TestMethod]
     public void Day13_Part2_Example01()
     {
         var input = """
-            <TODO>
+            [1,1,3,1,1]
+            [1,1,5,1,1]
+            
+            [[1],[2,3,4]]
+            [[1],4]
+            
+            [9]
+            [[8,7,6]]
+            
+            [[4,4],4,4]
+            [[4,4],4,4,4]
+            
+            [7,7,7,7]
+            [7,7,7]
+            
+            []
+            [3]
+            
+            [[[]]]
+            [[]]
+            
+            [1,[2,[3,[4,[5,6,7]]]],8,9]
+            [1,[2,[3,[4,[5,6,0]]]],8,9]
             """;
         var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day13_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("140", result);
     }
     
     [TestMethod]
     public void Day13_Part2()
     {
         var result = Part2(Common.DayInput(nameof(Day13)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("22110", result);
     }
     
 }

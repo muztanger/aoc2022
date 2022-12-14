@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace Advent_of_Code_2022;
@@ -43,71 +44,13 @@ public class Day13
     private static string Part1(IEnumerable<string> input)
     {
         var result = new List<int>();
-        var pair = new Item[2];
+        var pair = new JsonElement[2];
         var index = 0;
         foreach (var line in input)
         {
             if (string.IsNullOrEmpty(line)) continue;
 
-            var moop = JsonDocument.Parse(line); //TODO
-
-            var lists = new List<Item>();
-            Item root = new ListItem();
-            var current = root;
-            var val = new StringBuilder();
-            var stack = new Stack<Item>();
-            foreach (var c in line)
-            {
-                
-                Assert.IsTrue(current != null);
-                switch (c)
-                {
-                    case '[':
-                        current = new ListItem() { Parent = current };
-                        break;
-                    case ']':
-                        {
-                            if (current is IntItem integer)
-                            {
-                                integer.X = int.Parse(val.ToString());
-                                val.Clear();
-                            }
-                            if (current.Parent is ListItem list)
-                            {
-                                list.Items.Add(current);
-                            }
-                            current = current.Parent;
-                        }
-                        break;
-                    case ',':
-                        {
-                            if (current is IntItem integer)
-                            {
-                                integer.X = int.Parse(val.ToString());
-                                val.Clear();
-                            }
-                            if (current.Parent is ListItem list)
-                            {
-                                list.Items.Add(current);
-                            }
-                            current = current.Parent;
-                        }
-                        break;
-                    case char d when d >= '0' && d <= '9':
-                        val.Append(c);
-                        if (current is not IntItem)
-                        {
-                            current = new IntItem() { Parent = current };
-                        }
-                        break;
-                    default:
-                        Assert.Fail(c.ToString());
-                        break;
-                }
-            }
-            root = current;
-
-            pair[index % 2] = root;
+            pair[index % 2] = JsonDocument.Parse(line).RootElement;
 
             if (index > 0 && index % 2 == 1)
             {
@@ -126,15 +69,15 @@ public class Day13
         return result.Sum().ToString();
     }
 
-    private static Order Compare(Item c1, Item c2)
+    private static Order Compare(JsonElement c1, JsonElement c2)
     {
-        if (c1 is IntItem i1 && c2 is IntItem i2)
+        if (c1.ValueKind == JsonValueKind.Number && c2.ValueKind == JsonValueKind.Number)
         {
-            if (i1.X > i2.X)
+            if (c1.GetInt32() > c2.GetInt32())
             {
                 return Order.NotRight;
             }
-            else if (i1.X < i2.X)
+            else if (c1.GetInt32() < c2.GetInt32())
             {
                 return Order.Right;
             }
@@ -143,39 +86,43 @@ public class Day13
                 return Order.Continue;
             }
         }
-        else if (c1 is IntItem && c2 is ListItem)
+        else if (c1.ValueKind == JsonValueKind.Number && c2.ValueKind == JsonValueKind.Array)
         {
-            var l1 = new ListItem { Items = new() { c1 } };
+            var a1 = new int[1] { c1.GetInt32() };
+            var l1 = JsonSerializer.SerializeToElement(a1, typeof(int[]));
+
             Order compare = Compare(l1, c2);
             if (compare != Order.Continue)
             {
                 return compare;
             }
         }
-        else if (c1 is ListItem && c2 is IntItem)
+        else if (c1.ValueKind == JsonValueKind.Array && c2.ValueKind == JsonValueKind.Number)
         {
-            var l2 = new ListItem { Items = new() { c2 } };
+            var a2 = new int[1] {c2.GetInt32()};
+            var l2 = JsonSerializer.SerializeToElement(a2, typeof(int[]));
             Order compare = Compare(c1, l2);
             if (compare != Order.Continue)
             {
                 return compare;
             }
         }
-        else if (c1 is ListItem l1 && c2 is ListItem l2)
+        else if (c1.ValueKind == JsonValueKind.Array && c2.ValueKind == JsonValueKind.Array)
         {
-            for (int i = 0; i < Math.Min(l1.Items.Count, l2.Items.Count); i++)
+            int minLength = Math.Min(c1.GetArrayLength(), c2.GetArrayLength());
+            for (int i = 0; i < minLength; i++)
             {
-                var compare = Compare(l1.Items[i], l2.Items[i]);
+                var compare = Compare(c1[i], c2[i]);
                 if (compare != Order.Continue)
                 {
                     return compare;
                 }
             }
-            if (l1.Items.Count > l2.Items.Count)
+            if (c1.GetArrayLength() > c2.GetArrayLength())
             {
                 return Order.NotRight;
             }
-            else if (l1.Items.Count < l2.Items.Count)
+            else if (c1.GetArrayLength() < c2.GetArrayLength())
             {
                 return Order.Right;
             }

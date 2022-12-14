@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Text.Json;
 
 namespace Advent_of_Code_2022;
 
@@ -48,6 +49,8 @@ public class Day13
         {
             if (string.IsNullOrEmpty(line)) continue;
 
+            var moop = JsonDocument.Parse(line); //TODO
+
             var lists = new List<Item>();
             Item root = new ListItem();
             var current = root;
@@ -55,6 +58,7 @@ public class Day13
             var stack = new Stack<Item>();
             foreach (var c in line)
             {
+                
                 Assert.IsTrue(current != null);
                 switch (c)
                 {
@@ -224,7 +228,8 @@ public class Day13
     public void Day13_Part1_Example02()
     {
         var input = """
-            <TODO>
+            [[[],[3,2,10]]]
+            [[[],2,[],1,[4,1]],[3,[[8,4,0,7,8],4,2]],[[9,[2,1,8,2],[6,0,3,1,1]],4],[10,2,2]]
             """;
         var result = Part1(Common.GetLines(input));
         Assert.AreEqual("", result);

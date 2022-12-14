@@ -130,4 +130,11 @@ public class Pos<T> : IEquatable<Pos<T>>
         return y <= T.One && x <= T.One;
     }
 
+    internal Pos<T> Sign(Pos<T> other)
+    {
+        var dp = other - this;
+        dp.x = T.Sign(dp.x) switch { -1 => -T.One, 1 => T.One, _ => T.Zero };
+        dp.y = T.Sign(dp.y) switch { -1 => -T.One, 1 => T.One, _ => T.Zero };
+        return new Pos<T>(dp);
+    }
 }

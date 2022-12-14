@@ -8,12 +8,18 @@ public class Box<T> where T : INumber<T>
     public T Width => T.Abs(LowerRight.x - UpperLeft.x);
     public T Height => T.Abs(LowerRight.y - UpperLeft.y);
 
-    public Box(Pos<T> upperLeft, Pos<T> lowerRight) 
+    public Box(Pos<T> p1, Pos<T> p2) 
     {
-        if (upperLeft.x > lowerRight.x) throw new ArgumentException("upperLeft is right of lowerRight");
-        if (upperLeft.y > lowerRight.y) throw new ArgumentException("upperLeft is below lowerRight");
-        UpperLeft = upperLeft;
-        LowerRight = lowerRight;
+        UpperLeft = new Pos<T>(T.Min(p1.x, p2.x), T.Min(p1.y, p2.y));
+        LowerRight = new Pos<T>(T.Max(p1.x, p2.x), T.Max(p1.y, p2.y));
+    }
+
+    public void IncreaseToPoint(Pos<T> p)
+    {
+        UpperLeft.x = T.Min(UpperLeft.x, p.x);
+        UpperLeft.y = T.Min(UpperLeft.y, p.y);
+        LowerRight.x = T.Max(LowerRight.x, p.x);
+        LowerRight.y = T.Max(LowerRight.y, p.y);
     }
 
     public override string ToString()

@@ -295,24 +295,14 @@ public class Day12
             abdefghi
             """;
         var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day12_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("29", result);
     }
     
     [TestMethod]
     public void Day12_Part2()
     {
         var result = Part2(Common.DayInput(nameof(Day12)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("377", result);
     }
     
 }

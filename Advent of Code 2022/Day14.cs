@@ -84,6 +84,7 @@ public class Day14
 
     private static void PrintCave(Dictionary<Pos<int>, char> units, Box<int> area, HashSet<Pos<int>> sands)
     {
+#if DEBUG
         var cave = new StringBuilder();
         for (int y = area.UpperLeft.y; y <= area.LowerRight.y; y++)
         {
@@ -109,6 +110,7 @@ public class Day14
             }
         }
         Console.WriteLine(cave);
+#endif
     }
 
     private static string Part2(IEnumerable<string> input)
@@ -208,24 +210,14 @@ public class Day14
             503,4 -> 502,4 -> 502,9 -> 494,9
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day14_Part1_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("24", result);
     }
     
     [TestMethod]
     public void Day14_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day14)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("913", result);
     }
     
     [TestMethod]
@@ -236,24 +228,14 @@ public class Day14
             503,4 -> 502,4 -> 502,9 -> 494,9
             """;
         var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day14_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("93", result);
     }
     
     [TestMethod]
     public void Day14_Part2()
     {
         var result = Part2(Common.DayInput(nameof(Day14)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("30762", result);
     }
     
 }

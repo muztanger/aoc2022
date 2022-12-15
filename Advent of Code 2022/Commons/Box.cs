@@ -2,38 +2,43 @@
 
 public class Box<T> where T : INumber<T>
 {
-    public Pos<T> UpperLeft { get; set; }
-    public Pos<T> LowerRight { get; set; }
+    public Pos<T> Min { get; set; }
+    public Pos<T> Max { get; set; }
 
-    public T Width => T.Abs(LowerRight.x - UpperLeft.x);
-    public T Height => T.Abs(LowerRight.y - UpperLeft.y);
+    public T Width => T.Abs(Max.x - Min.x);
+    public T Height => T.Abs(Max.y - Min.y);
 
-    public Box(Pos<T> p1, Pos<T> p2) 
+    public Box(params Pos<T>[] positions) 
     {
-        UpperLeft = new Pos<T>(T.Min(p1.x, p2.x), T.Min(p1.y, p2.y));
-        LowerRight = new Pos<T>(T.Max(p1.x, p2.x), T.Max(p1.y, p2.y));
+        Assert.IsTrue(positions.Length > 0);
+        Min = new Pos<T>(positions[0]);
+        Max = new Pos<T>(positions[0]);
+        foreach (var p in positions)
+        {
+            IncreaseToPoint(p);
+        }
     }
 
     public void IncreaseToPoint(Pos<T> p)
     {
-        UpperLeft.x = T.Min(UpperLeft.x, p.x);
-        UpperLeft.y = T.Min(UpperLeft.y, p.y);
-        LowerRight.x = T.Max(LowerRight.x, p.x);
-        LowerRight.y = T.Max(LowerRight.y, p.y);
+        Min.x = T.Min(Min.x, p.x);
+        Min.y = T.Min(Min.y, p.y);
+        Max.x = T.Max(Max.x, p.x);
+        Max.y = T.Max(Max.y, p.y);
     }
 
     public override string ToString()
     {
-        return $"[{UpperLeft}, {LowerRight}]";
+        return $"[{Min}, {Max}]";
     }
 
     public bool IsInside(Pos<T> pos)
     {
-        if (pos.x < UpperLeft.x || pos.x > LowerRight.x)
+        if (pos.x < Min.x || pos.x > Max.x)
         {
             return false;
         }
-        if (pos.y < UpperLeft.y || pos.y > LowerRight.y)
+        if (pos.y < Min.y || pos.y > Max.y)
         {
             return false;
         }

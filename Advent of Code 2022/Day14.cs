@@ -63,7 +63,7 @@ public class Day14
                     hasMoved = true;
                     break;
                 }
-                if (sand.y > area.LowerRight.y)
+                if (sand.y > area.Max.y)
                 {
                     // into the abyss!
                     sandFall = false;
@@ -86,13 +86,13 @@ public class Day14
     {
 #if DEBUG
         var cave = new StringBuilder();
-        for (int y = area.UpperLeft.y; y <= area.LowerRight.y; y++)
+        for (int y = area.Min.y; y <= area.Max.y; y++)
         {
-            if (y != area.UpperLeft.y)
+            if (y != area.Min.y)
             {
                 cave.AppendLine();
             }
-            for (int x = area.UpperLeft.x; x <= area.LowerRight.x; x++)
+            for (int x = area.Min.x; x <= area.Max.x; x++)
             {
                 var p = new Pos<int>(x, y);
                 if (units.TryGetValue(p, out var c))
@@ -148,7 +148,7 @@ public class Day14
         var sands = new HashSet<Pos<int>>();
         PrintCave(units, area, sands);
 
-        var floor = area.LowerRight.y + 1;
+        var floor = area.Max.y + 1;
 
         var sandFall = true;
         while (sandFall)

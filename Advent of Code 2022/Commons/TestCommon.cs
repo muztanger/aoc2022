@@ -23,9 +23,9 @@ public class TestCommon
         // Test IsInside
         Assert.IsTrue(window.IsInside(new Pos<int>(1, 1)));
 
-        for (int x = window.UpperLeft.x; x <= window.LowerRight.x; x++)
+        for (int x = window.Min.x; x <= window.Max.x; x++)
         {
-            for (int y = window.UpperLeft.y; y <= window.LowerRight.y; y++)
+            for (int y = window.Min.y; y <= window.Max.y; y++)
             {
                 Assert.IsTrue(window.IsInside(new Pos<int>(x, y)));
             }

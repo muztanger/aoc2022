@@ -137,4 +137,9 @@ public class Pos<T> : IEquatable<Pos<T>>
         dp.y = T.Sign(dp.y) switch { -1 => -T.One, 1 => T.One, _ => T.Zero };
         return new Pos<T>(dp);
     }
+
+    internal Pos<T> Abs()
+    {
+        return new Pos<T>(T.Abs(x), T.Abs(y));
+    }
 }

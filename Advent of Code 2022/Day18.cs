@@ -88,7 +88,7 @@ public class Day18
             return true;
         }
 
-        return ("moop" + count).ToString();
+        return count.ToString();
     }
 
     [TestMethod]
@@ -99,7 +99,7 @@ public class Day18
             2,1,1
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("10", result);
     }
     
     [TestMethod]
@@ -121,14 +121,14 @@ public class Day18
             2,3,5
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("64", result);
     }
     
     [TestMethod]
     public void Day18_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day18)));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("4628", result);
     }
     
     [TestMethod]
@@ -150,7 +150,7 @@ public class Day18
             2,3,5
             """;
         var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("58", result);
     }
     
     [TestMethod]
@@ -161,27 +161,15 @@ public class Day18
             2,1,1
             """;
         var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("10", result);
     }
-
-    [TestMethod]
-    public void Day18_Part2_Example03()
-    {
-        var input = """
-            1,1,1
-            3,1,1
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-
 
     [TestMethod]
     public void Day18_Part2()
     {
         var result = Part2(Common.DayInput(nameof(Day18)));
         Assert.AreNotEqual("2572", result); // answer for someone else??
-        Assert.AreEqual("", result);
+        Assert.AreEqual("2582", result);
     }
     
 }

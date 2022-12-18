@@ -39,7 +39,7 @@ file class Game
 
     public static Play Tactic(Play oponent, string tactic)
     {
-        //X means you need to lose, Y means you need to end the round in a draw, and Z means you need to win. Good luck!"
+        //XYPlane means you need to lose, Y means you need to end the round in a draw, and Z means you need to win. Good luck!"
         if (tactic == "Y")
         {
             return oponent;

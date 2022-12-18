@@ -1,10 +1,13 @@
 ﻿namespace Advent_of_Code_2022.Commons;
 
-public class Pos3<T> where T : INumber<T>
+public class Pos3<T> : IEquatable<Pos3<T>> where T : INumber<T> 
 {
     public T x;
     public T y;
     public T z;
+
+    public Pos<T> XY => new(x, y);
+    public Pos<T> YZ => new(y, z);
 
     public Pos3(T x, T y, T z)
     {
@@ -51,5 +54,36 @@ public class Pos3<T> where T : INumber<T>
         var dy = TResult.CreateChecked(delta.y);
         var dz = TResult.CreateChecked(delta.z);
         return TResult.Sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null)
+            return false;
+
+        Pos3<T>? posObj = obj as Pos3<T>;
+        if (posObj == null)
+            return false;
+        else
+            return Equals(posObj);
+    }
+
+    public bool Equals(Pos3<T>? other)
+    {
+        return other != null &&
+               x == other.x &&
+               y == other.y &&
+               z == other.z;
+    }
+
+    public override int GetHashCode()
+    {
+        unchecked {
+            int hash = (int)199933;
+            hash = (hash * 993319) ^ x.GetHashCode();
+            hash = (hash * 993319) ^ y.GetHashCode();
+            hash = (hash * 993319) ^ z.GetHashCode();
+            return hash;
+        }
     }
 }

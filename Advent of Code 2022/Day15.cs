@@ -40,7 +40,7 @@ public class Day15
             // paint area around beacon and signal
             var dist = sensor.Manhattan(closestBeacon);
             var paintArea = new Box<long>(sensor, sensor - new Pos<long>(dist, dist), sensor + new Pos<long>(dist, dist));
-            //for (long y = paintArea.Min.y; y <= paintArea.Max.y; y++)
+            //for (long y = paintArea.XYPlane.y; y <= paintArea.YZPlane.y; y++)
             {
                 long y = checkY;
                 for (long x = paintArea.Min.x; x <= paintArea.Max.x; x++)
@@ -57,7 +57,7 @@ public class Day15
 
         var toString = new StringBuilder();
         var count = 0;
-        //for (long y = area.Min.y; y <= area.Max.y; y++)
+        //for (long y = area.XYPlane.y; y <= area.YZPlane.y; y++)
         {
             long y = checkY;
             if (y != area.Min.y)

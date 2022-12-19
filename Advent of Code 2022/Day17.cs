@@ -76,6 +76,7 @@ public class Day17
                 {
                     var p1 = new Pos<int>(x, y);
                     var p2 = new Pos<int>(x + pos.x, rock.Height - y - pos.y);
+                    _stoppedRocks[p2.y][p2.x] = rock[p1];
                 }
             }
         }

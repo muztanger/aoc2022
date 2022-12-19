@@ -1,6 +1,7 @@
 ﻿namespace Advent_of_Code_2022.Commons;
 
-public class Box<T> where T : INumber<T>
+public class Box<T>: IEquatable<Box<T>>
+    where T : INumber<T>
 {
     public Pos<T> Min { get; set; }
     public Pos<T> Max { get; set; }
@@ -43,5 +44,29 @@ public class Box<T> where T : INumber<T>
             return false;
         }
         return true;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null)
+            return false;
+
+        Box<T>? posObj = obj as Box<T>;
+        if (posObj == null)
+            return false;
+        else
+            return Equals(posObj);
+    }
+
+    public bool Equals(Box<T>? other)
+    {
+        return other != null &&
+               Max == other.Max &&
+               Min == other.Min;
+    }
+
+    public override int GetHashCode()
+    {
+        return Min.GetHashCode() * 3779 + Max.GetHashCode();
     }
 }

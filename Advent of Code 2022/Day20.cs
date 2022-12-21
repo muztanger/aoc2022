@@ -127,10 +127,7 @@ public class Day20
 
             Console.WriteLine($"Move {current} to {next}");
             Assert.IsNotNull(next);
-            //if (current.X != 0)
-            {
-                Move(current, next);
-            }
+            Move(current, next);
             Assert.IsTrue(CheckList(current), $"{current} {next}");
             //Print(initial[0], initial.Count);
 

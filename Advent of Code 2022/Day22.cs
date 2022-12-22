@@ -65,28 +65,39 @@ public class Day22
             }
         }
 
-        int width = map[0].Count;
+        int width = map.Max(m => m.Count);
         int height = map.Count;
-        var mapSize = new Box<int>(new Pos<int>(0,0), new Pos<int>(width, height));
+        var mapSize = new Box<int>(new Pos<int>(0,0), new Pos<int>(width - 1, height - 1));
+        foreach (var row in map)
+        {
+            while (row.Count < width)
+            {
+                row.Add(' ');
+            }
+        }
 
         var pos = new Pos<int>(0, 0);
         {
             var x = map[0].IndexOf('.');
             pos.x = x;
         }
-        var dirs = new List<Pos<int>> { new(1, 0), new(0, -1), new(-1, 0), new(0, -1) };
+        var dirs = new List<Pos<int>> { new(1, 0), new(0, 1), new(-1, 0), new(0, -1) };
         var facing = 0;
         var dir = dirs[facing];
 
+        Console.WriteLine("---------");
         foreach (var instruction in path)
         {
+            Console.WriteLine($"Instruction={instruction} Pos={pos} dir={dir} facing={facing}");
             if (instruction.Turn == Turn.Right)
             {
                 facing = (facing + 1) % dirs.Count;
+                dir = dirs[facing];
             }
             else if (instruction.Turn == Turn.Left)
             {
                 facing = (facing + dirs.Count - 1) % dirs.Count;
+                dir = dirs[facing];
             }
             else
             {
@@ -95,14 +106,14 @@ public class Day22
                     var next = pos + dir;
                     if (mapSize.IsInside(next))
                     {
-                        var c = map[pos.y][pos.x];
+                        var c = map[next.y][next.x];
                         if (c == '.')
                         {
                             pos = next;
                         }
                         else if (c == '#')
                         {
-                            // just stay
+                            break;
                         }
                         else if (c == ' ')
                         {
@@ -115,11 +126,11 @@ public class Day22
                                     next.y = (next.y + height) % height;
                                     Assert.IsTrue(mapSize.IsInside(next));
                                 }
-                                c = map[pos.y][pos.x];
+                                c = map[next.y][next.x];
                             }
                             if (c == '#')
                             {
-                                // just stay
+                                break;
                             }
                             else if (c == '.')
                             {
@@ -130,13 +141,35 @@ public class Day22
                     else
                     {
                         //wrap and go!
+                        next.x = (next.x + width) % width;
+                        next.y = (next.y + height) % height;
+                        var c = map[next.y][next.x];
+                        while (c == ' ')
+                        {
+                            next += dir;
+                            if (!mapSize.IsInside(next))
+                            {
+                                next.x = (next.x + width) % width;
+                                next.y = (next.y + height) % height;
+                                Assert.IsTrue(mapSize.IsInside(next));
+                            }
+                            c = map[next.y][next.x];
+                        }
+                        if (c == '#')
+                        {
+                            break;
+                        }
+                        else if (c == '.')
+                        {
+                            pos = next;
+                        }
                     }
                 }
             }
         }
 
 
-        return (pos.y * 1000 + 4 * pos.x + facing).ToString();
+        return ((pos.y + 1) * 1000 + 4 * (pos.x + 1) + facing).ToString();
     }
     
     private static string Part2(IEnumerable<string> input)
@@ -168,7 +201,7 @@ public class Day22
             10R5L5R10L4R5L5
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("6032", result);
     }
     
     [TestMethod]

@@ -67,7 +67,14 @@ public class Day23
         }
 
         Console.WriteLine(i);
-        result = CountEmpty(elfs);
+        if (check < 0)
+        {
+            result = i + 1;
+        }
+        else
+        {
+            result = CountEmpty(elfs);
+        }
         Print(elfs);
 
         bool Scan(IEnumerable<Pos<int>> elfs, int offset)
@@ -180,7 +187,7 @@ public class Day23
             .....
             """;
         var result = Simulate(Common.GetLines(input), -1);
-        Assert.AreEqual("25", result);
+        Assert.AreEqual("4", result);
     }
     
     [TestMethod]
@@ -210,8 +217,7 @@ public class Day23
     public void Day23_Part2()
     {
         var result = Simulate(Common.DayInput(nameof(Day23)), -1);
-        Assert.AreNotEqual("16406", result); // too high
-        Assert.AreEqual("", result);
+        Assert.AreEqual("1008", result);
     }
 
     [TestMethod]

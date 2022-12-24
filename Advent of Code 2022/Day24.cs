@@ -7,6 +7,7 @@ public class Day24
     {
         internal Pos<int> Pos { get; set; } = new(0, 0);
         internal Pos<int> Dir { get; set; } = new(0, 0);
+        internal Pos<int> Next { get; set; } = new(0, 0);
     }
 
     class Valley
@@ -14,29 +15,47 @@ public class Day24
         internal Box<int> Area { get; set; } = new(new Pos<int>(0, 0));
         internal Box<int> InnerArea { get; set; } = new(new Pos<int>(1, 1));
 
-        internal Pos<int> Start { get; set;} = new(1, 0);
+        internal static Pos<int> Start { get; } = new(1, 0);
         internal Pos<int> End { get; set; } = new(0, 1);
         internal List<Blizard> Blizards { get; set; } = new List<Blizard>();
 
-        internal void Tick()
+        internal void ForwardTick()
+        {
+            Step(1);
+        }
+
+        internal void BackwardTick()
+        {
+            Step(-1);
+        }
+
+        private void Step(int direction)
         {
             foreach (var blizard in Blizards)
             {
-                var next = blizard.Pos + blizard.Dir;
+                var next = blizard.Pos + blizard.Dir * Math.Sign(direction);
                 if (InnerArea.IsInside(next))
                 {
-                    blizard.Pos = next;
+                    blizard.Next = next;
                 }
                 else
                 {
                     var q = next - InnerArea.Min; // move for modulus operation
                     q = (q + InnerArea.Size) % InnerArea.Size;
-                    blizard.Pos = q + InnerArea.Min;
+                    blizard.Next = q + InnerArea.Min;
                 }
             }
         }
 
-        public override string ToString()
+        internal void Tock()
+        {
+            foreach (var blizard in Blizards)
+            {
+                blizard.Pos = blizard.Next;
+            }
+        }
+
+        public string ToString(Pos<int> expidition)
         {
             var result = new StringBuilder();
             for (int x = Area.Min.x; x <= Area.Max.x; x++)
@@ -62,19 +81,26 @@ public class Day24
                 for (int x = InnerArea.Min.x; x <= InnerArea.Max.x; x++)
                 {
                     var p = new Pos<int>(x, y);
-                    var blizards = Blizards.Where(b => b.Pos == p);
-                    var count = blizards.Count();
-                    if (count <= 0)
+                    if (p == expidition)
                     {
-                        result.Append('.');
-                    }
-                    else if (count == 1)
-                    {
-                        result.Append(DirectionChars[blizards.First().Dir]);
+                        result.Append('E');
                     }
                     else
                     {
-                        result.Append(count > 9 ? '∞' : count);
+                        var blizards = Blizards.Where(b => b.Pos == p);
+                        var count = blizards.Count();
+                        if (count <= 0)
+                        {
+                            result.Append('.');
+                        }
+                        else if (count == 1)
+                        {
+                            result.Append(DirectionChars[blizards.First().Dir]);
+                        }
+                        else
+                        {
+                            result.Append(count > 9 ? '∞' : count);
+                        }
                     }
                 }
                 result.Append('#');
@@ -82,7 +108,7 @@ public class Day24
             result.AppendLine();
             for (int x = Area.Min.x; x <= Area.Max.x; x++)
             {
-                var p = new Pos<int>(x, Area.Min.y);
+                var p = new Pos<int>(x, Area.Max.y);
                 if (p == End)
                 {
                     result.Append('.');
@@ -94,25 +120,11 @@ public class Day24
             }
             return result.ToString();
         }
-    }
 
-    static internal Dictionary<char, Pos<int>> Directions = new()
-    {
-        { '>', new Pos<int>( 1,  0) },
-        { '<', new Pos<int>(-1,  0) },
-        { '^', new Pos<int>( 0, -1) },
-        { 'v', new Pos<int>( 0,  1) },
-    };
-
-    static internal Dictionary<Pos<int>, char> DirectionChars = Directions.ToDictionary(x => x.Value, x => x.Key);
-
-    private static string Part1(IEnumerable<string> input)
-    {
-        var result = new StringBuilder();
-        
-        var valley = new Valley();
-
+        internal static Valley FromInput(IEnumerable<string> input)
         {
+            var valley = new Valley();
+
             int y = 0;
             foreach (var line in input)
             {
@@ -138,20 +150,84 @@ public class Day24
             }
             valley.End = new(valley.Area.Max.x - 1, valley.Area.Max.y);
             valley.InnerArea.IncreaseToPoint(new(valley.Area.Max - Pos<int>.One));
+
+            return valley;
         }
 
-        for (int i = 0; i < 19; i++)
+    }
+
+    static internal List<char> Order = new List<char> { '>', 'v', 'O', '<', '^'};
+
+    static internal Dictionary<char, Pos<int>> Directions = new()
+    {
+        { '>', new Pos<int>( 1,  0) },
+        { '<', new Pos<int>(-1,  0) },
+        { '^', new Pos<int>( 0, -1) },
+        { 'v', new Pos<int>( 0,  1) },
+        { 'O', new Pos<int>( 0,  0) },
+    };
+
+    static internal Dictionary<Pos<int>, char> DirectionChars = Directions.ToDictionary(x => x.Value, x => x.Key);
+
+    //TODO! Something tree... in combination with someting move forward and backward in time and keep track of options and what has been tested... something detect loops and something remember dead ends.. 😉
+    class Option
+    {
+        public int Index = 0;
+        public int Minute = 0;
+        public new List<Option> Options = new List<Option>();
+    }
+
+    private static string Part1(IEnumerable<string> input)
+    {
+        var result = new StringBuilder();
+        var valley = Valley.FromInput(input);
+
+        // Dijkstra using minutes as weight for adjacent??
+
+        var expidition = new Pos<int>(Valley.Start);
+        var isFinished = false;
+        for (int i = 0; i < 19 && !isFinished; i++)
         {
             Console.WriteLine("Minute: " + i);
-            Console.WriteLine(valley.ToString());
+            Console.WriteLine(valley.ToString(expidition));
             Console.WriteLine();
-            valley.Tick();
+            valley.ForwardTick();
+            
+            var options = new List<Pos<int>>();
+            foreach (var dir in Order.Select(c => Directions[c]))
+            {
+                var next = expidition + dir;
+                if (next == valley.End)
+                {
+                    //WOHOO! how many steps did this take??
+                    options = new List<Pos<int>> { valley.End };
+                    isFinished = true;
+                    break;
+                }
+                else if (valley.InnerArea.IsInside(next) && !valley.Blizards.Any(b => b.Next == next))
+                {
+                    options.Add(next);
+                }
+            }
+            if (options.Count == 0)
+            {
+                Console.WriteLine($"Expidition {expidition} is stuck!");
+                isFinished = true;
+                break;
+            }
+            else
+            {
+                Console.WriteLine($"Expidition at {expidition} options={string.Join(",", options)} choosing={options[0]}");
+                expidition = options[0];
+            }
+            valley.Tock();
         }
 
 
         return "mmmop".ToString();
     }
-    
+
+
     private static string Part2(IEnumerable<string> input)
     {
         var result = new StringBuilder();

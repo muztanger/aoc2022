@@ -3,6 +3,36 @@ namespace Advent_of_Code_2022;
 [TestClass]
 public class Day23
 {
+    static readonly Pos<int> N = new Pos<int>(0, -1);
+    static readonly Pos<int> NE = new Pos<int>(1, -1);
+    static readonly Pos<int> NW = new Pos<int>(-1, -1);
+
+    static readonly Pos<int> S = new Pos<int>(0, 1);
+    static readonly Pos<int> SE = new Pos<int>(1, 1);
+    static readonly Pos<int> SW = new Pos<int>(-1, 1);
+
+    static readonly Pos<int> W = new Pos<int>(-1, 0);
+    static readonly Pos<int> E = new Pos<int>(1, 0);
+
+    static readonly Dictionary<string, List<Pos<int>>> considers = new Dictionary<string, List<Pos<int>>>
+            {
+                { "A",  new List<Pos<int>> {N, NE, NW, S, SE, SW, W, E } },
+                { "N",  new List<Pos<int>> {N, NE, NW} },
+                { "S",  new List<Pos<int>> {S, SE, SW} },
+                { "W",  new List<Pos<int>> {W, NW, SW} },
+                { "E",  new List<Pos<int>> {E, NE, SE} },
+            };
+    static readonly Dictionary<string, Pos<int>> directions = new Dictionary<string, Pos<int>>
+            {
+                { "N",  N },
+                { "S",  S },
+                { "W",  W },
+                { "E",  E },
+            };
+
+    static readonly List<string> order = new List<string> { "N", "S", "W", "E" };
+
+
     private static string Simulate(IEnumerable<string> input, int check)
     {
         var result = 0;
@@ -28,42 +58,19 @@ public class Day23
         for (int i = 0; Scan(elfs, i); i++)
         {
             //Console.WriteLine($"== End of Round {i + 1} ==");
-            result = CountEmpty(elfs);
-            if (i > 0 && i + 1 == check) break;
+            if (check > 0 && i + 1 == check)
+            {
+                break;
+            }
             //Console.WriteLine();
         }
+        result = CountEmpty(elfs);
+        Print(elfs);
 
         bool Scan(IEnumerable<Pos<int>> elfs, int offset)
         {
-            Pos<int> N = new Pos<int>(0, -1);
-            Pos<int> NE = new Pos<int>(1, -1);
-            Pos<int> NW = new Pos<int>(-1, -1);
-
-            Pos<int> S = new Pos<int>(0, 1);
-            Pos<int> SE = new Pos<int>(1, 1);
-            Pos<int> SW = new Pos<int>(-1, 1);
-
-            Pos<int> W = new Pos<int>(-1, 0);
-            Pos<int> E = new Pos<int>(1, 0);
-
-            Dictionary<string, List<Pos<int>>> considers = new Dictionary<string, List<Pos<int>>>
-            {
-                { "A",  new List<Pos<int>> {N, NE, NW, S, SE, SW, W, E } },
-                { "N",  new List<Pos<int>> {N, NE, NW} },
-                { "S",  new List<Pos<int>> {S, SE, SW} },
-                { "W",  new List<Pos<int>> {W, NW, SW} },
-                { "E",  new List<Pos<int>> {E, NE, SE} },
-            };
-            Dictionary<string, Pos<int>> directions = new Dictionary<string, Pos<int>>
-            {
-                { "N",  N },
-                { "S",  S },
-                { "W",  W },
-                { "E",  E },
-            };
-            List<string> order = new List<string> { "N", "S", "W", "E" };
-
             var proposals = new Dictionary<Pos<int>, List<Pos<int>>>();
+            var elfsHash = new HashSet<Pos<int>>(elfs);
 
             int Count(Pos<int> elf, IEnumerable<Pos<int>> elfs, IEnumerable<Pos<int>> considers)
             {
@@ -77,13 +84,13 @@ public class Day23
                     var index = (i + offset) % order.Count;
                     var dir = directions[order[index]];
 
-                    if (Count(elf, elfs, considers["A"]) == 0)
+                    if (Count(elf, elfsHash, considers["A"]) == 0)
                     {
                         // No other elfs...stay put
                         //Console.WriteLine($"Elf{elf} stays");
                         break;
                     }
-                    else if (Count(elf, elfs, considers[order[index]]) == 0)
+                    else if (Count(elf, elfsHash, considers[order[index]]) == 0)
                     {
                         var proposal = elf + dir;
                         //Console.WriteLine($"Elf{elf} propose {proposal}");
@@ -219,7 +226,8 @@ public class Day23
     [TestMethod]
     public void Day23_Part2()
     {
-        var result = Part2(Common.DayInput(nameof(Day23)));
+        var result = Simulate(Common.DayInput(nameof(Day23)), -1);
+        Assert.AreNotEqual("16406", result); // too high
         Assert.AreEqual("", result);
     }
     

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NuGet.Frameworks;
+using System;
 
 namespace Advent_of_Code_2022.Commons;
 
@@ -25,27 +26,17 @@ public class Pos<T> : IEquatable<Pos<T>>
         this.y = other.y;
     }
 
-    public T Dist()
-    {
-        return T.Abs(y - x);
-    }
+    public T Dist() => T.Abs(y - x);
 
-    public static Pos<T> operator *(Pos<T> p1, T n)
-    {
-        return new Pos<T>(p1.x * n, p1.y * n);
-    }
-
-    public static Pos<T> operator *(T n, Pos<T> p1)
-    {
-        return p1 * n;
-    }
-
-    public static Pos<T> operator +(Pos<T> p1, Pos<T> p2)
-    {
-        return new Pos<T>(p1.x + p2.x, p1.y + p2.y);
-    }
+    public static Pos<T> operator *(Pos<T> p1, T n) => new Pos<T>(p1.x * n, p1.y * n);
+    public static Pos<T> operator *(T n, Pos<T> p1) => p1 * n;
+    public static Pos<T> operator %(Pos<T> p1, T n) => new Pos<T>(p1.x % n, p1.y % n);
+    public static Pos<T> operator %(Pos<T> p1, Pos<T> p2) => new Pos<T>(p1.x % p2.x, p1.y % p2.y);
+    public static Pos<T> operator +(Pos<T> p1, Pos<T> p2) => new Pos<T>(p1.x + p2.x, p1.y + p2.y);
     public static Pos<T> operator -(Pos<T> p) => new Pos<T>(-p.x, -p.y);
     public static Pos<T> operator -(Pos<T> p1, Pos<T> p2) => p1 + (-p2);
+
+    public static readonly Pos<T> One = new(T.One, T.One);
 
     public void Set(Pos<T> other)
     {

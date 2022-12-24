@@ -9,6 +9,7 @@ public class Box<T>: IEquatable<Box<T>>
     public T Width => T.Abs(Max.x - Min.x) + T.One;
     public T Height => T.Abs(Max.y - Min.y) + T.One;
     public T Area => Width * Height;
+    public Pos<T> Size => new(Width, Height);
 
     public Box(params Pos<T>[] positions) 
     {

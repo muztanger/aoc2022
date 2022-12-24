@@ -55,7 +55,8 @@ public class Day23
         }
 
         Print(elfs);
-        for (int i = 0; Scan(elfs, i); i++)
+        int i = 0;
+        for (; Scan(elfs, i); i++)
         {
             //Console.WriteLine($"== End of Round {i + 1} ==");
             if (check > 0 && i + 1 == check)
@@ -64,6 +65,8 @@ public class Day23
             }
             //Console.WriteLine();
         }
+
+        Console.WriteLine(i);
         result = CountEmpty(elfs);
         Print(elfs);
 
@@ -204,31 +207,27 @@ public class Day23
     }
     
     [TestMethod]
-    public void Day23_Part2_Example01()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
-    public void Day23_Part2_Example02()
-    {
-        var input = """
-            <TODO>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
-    
-    [TestMethod]
     public void Day23_Part2()
     {
         var result = Simulate(Common.DayInput(nameof(Day23)), -1);
         Assert.AreNotEqual("16406", result); // too high
         Assert.AreEqual("", result);
     }
-    
+
+    [TestMethod]
+    public void Day23_Part2_Example01()
+    {
+        var input = """
+            ....#..
+            ..###.#
+            #...#.#
+            .#...##
+            #.###..
+            ##.#.##
+            .#..#..
+            """;
+        var result = Simulate(Common.GetLines(input), -1);
+        Assert.AreEqual("20", result);
+    }
+
 }

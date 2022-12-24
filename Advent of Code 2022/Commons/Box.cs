@@ -6,8 +6,9 @@ public class Box<T>: IEquatable<Box<T>>
     public Pos<T> Min { get; set; }
     public Pos<T> Max { get; set; }
 
-    public T Width => T.Abs(Max.x - Min.x);
-    public T Height => T.Abs(Max.y - Min.y);
+    public T Width => T.Abs(Max.x - Min.x) + T.One;
+    public T Height => T.Abs(Max.y - Min.y) + T.One;
+    public T Area => Width * Height;
 
     public Box(params Pos<T>[] positions) 
     {
@@ -69,4 +70,5 @@ public class Box<T>: IEquatable<Box<T>>
     {
         return Min.GetHashCode() * 3779 + Max.GetHashCode();
     }
+
 }

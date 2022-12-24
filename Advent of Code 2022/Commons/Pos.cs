@@ -47,6 +47,12 @@ public class Pos<T> : IEquatable<Pos<T>>
     public static Pos<T> operator -(Pos<T> p) => new Pos<T>(-p.x, -p.y);
     public static Pos<T> operator -(Pos<T> p1, Pos<T> p2) => p1 + (-p2);
 
+    public void Set(Pos<T> other)
+    {
+        this.x = other.x;
+        this.y = other.y;
+    }
+
     public override string ToString()
     {
         return $"({x}, {y})";

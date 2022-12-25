@@ -121,7 +121,7 @@ public class Day25
             var sna = new Snafu<long> { NumStr = line };
             result += sna.GetValue();
         }
-        return result.ToString();
+        return Snafu<long>.FromDec(result).NumStr;
     }
     
     private static string Part2(IEnumerable<string> input)

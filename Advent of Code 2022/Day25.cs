@@ -208,15 +208,14 @@ public class Day25
             122
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("4890", result);
+        Assert.AreEqual("2=-1=0", result);
     }
     
     [TestMethod]
     public void Day25_Part1()
     {
         var result = Part1(Common.DayInput(nameof(Day25)));
-        Assert.AreNotEqual("31069194366050", result);
-        Assert.AreEqual("", result);
+        Assert.AreEqual("2=1-=02-21===-21=200", result);
     }
     
     [TestMethod]

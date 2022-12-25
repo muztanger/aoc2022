@@ -46,11 +46,11 @@ public class Day25
             T x = dec;
             var dict = new Dictionary<T, char>
             {
-                { -Two, '=' },
-                { -T.One, '-' },
-                { T.Zero, '0' },
-                { T.One, '1' },
-                { Two, '2' },
+                { T.Zero, '=' },
+                { T.One, '-' },
+                { Two, '0' },
+                { Three, '1' },
+                { Four, '2' },
             };
             var snafu = new StringBuilder();
 
@@ -80,19 +80,13 @@ public class Day25
             }
             else
             {
-                while (x > T.Zero)
+                var y = x;
+                while (y > T.Zero)
                 {
-                    x -= Base;
-                    snafu.Append(dict[x % Three]);
-                    x -= x % Three;
-                    x += Base;
-                    x /= Base;
-                    if (x <= Two * Base)
-                    {
-                        x = (x + Base) / Base;
-                        snafu.Append(dict[x % Three]);
-                        break;
-                    }
+                    y += Two;
+                    var z = y % Base;
+                    snafu.Append(dict[z]);
+                    y /= Base;
                 }
             }
             var skipLeadingZeros = new StringBuilder();
@@ -153,8 +147,6 @@ public class Day25
     public void Day25_SnafuToDecimal()
     {
         var input = """
-                        1         1
-                        2         2
                        1=         3
                        1-         4
                        10         5
@@ -168,6 +160,8 @@ public class Day25
                    1=11-2      2022
                   1-0---0     12345
             1121-1110-1=0 314159265
+                        1         1
+                        2         2
             1=-0-2     1747
             12111      906
              2=0=      198

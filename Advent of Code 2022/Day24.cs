@@ -170,11 +170,36 @@ public class Day24
     static internal Dictionary<Pos<int>, char> DirectionChars = Directions.ToDictionary(x => x.Value, x => x.Key);
 
     //TODO! Something tree... in combination with someting move forward and backward in time and keep track of options and what has been tested... something detect loops and something remember dead ends.. 😉
-    class Option
+    public class Option
     {
-        public int Index = 0;
         public int Minute = 0;
-        public new List<Option> Options = new List<Option>();
+        public Pos<int> Expidition = new Pos<int>(0, 0);
+        public Option? Parent = null;
+        public List<Option> Options = new();
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+                return false;
+
+            if (obj is not Option optionObj)
+                return false;
+            else
+                return Equals(optionObj);
+        }
+
+        public bool Equals(Option? other)
+        {
+            return other is not null &&
+                   Expidition == other.Expidition &&
+                   Minute == other.Minute;
+        }
+
+        public override int GetHashCode()
+        {
+            return Minute.GetHashCode() * 5009 + Expidition.GetHashCode();
+        }
+
     }
 
     private static string Part1(IEnumerable<string> input)
@@ -182,10 +207,14 @@ public class Day24
         var result = new StringBuilder();
         var valley = Valley.FromInput(input);
 
-        // Dijkstra using minutes as weight for adjacent??
-
         var expidition = new Pos<int>(Valley.Start);
         var isFinished = false;
+        var root = new Option
+        {
+            Expidition = new Pos<int>(expidition),
+            Minute = 0,
+        };
+        var current = root;
         for (int i = 0; i < 19 && !isFinished; i++)
         {
             Console.WriteLine("Minute: " + i);

@@ -151,6 +151,56 @@ public class Day17
             }
             return result.ToString();
         }
+
+        internal Box<int>? Intersection(Box<int> spriteArea)
+        {
+            return new Box<int>(Width, Height).Intersection(spriteArea);
+        }
+
+        internal bool IsInto(Rock rock)
+        {
+            var intersection = new Box<int>(Width, Height).Intersection(rock.SpriteArea);
+            if (intersection is null) return false;
+
+            // 
+            //  --------+------------+
+            //  Solids  | Chamber    |
+            //  solid y | rock.Pos.y |
+            //  --------+------------+
+            //        4 |         -4 |
+            //        3 |         -3 |
+            //        2 |         -2 |
+            //        1 |         -1 |
+            //        0 |          0 |
+            //  --------+------------+
+            //
+            //  Rock.Pos (2, -3)
+            // 
+            //  Rock y |
+            //  -------+------
+            //       0 | ····
+            //       1 | ■■··
+            //       3 | ·■■·
+            //       4 | ····
+            // 
+
+            for (int ny = intersection.Min.y; ny <= intersection.Max.y; ny++)
+            {
+                for (int x = intersection.Min.x; x <= intersection.Max.x; x++)
+                {
+                    var y = -ny;
+                    var i = x - rock.Pos.x;
+                    var j = y - rock.Pos.y;
+                    var p1 = new Pos<int>(i, j);
+                    var p2 = new Pos<int>(x, y - rock.Pos.y);
+                    if (rock[p1] == '#' && _solids[p2.y][p2.x] == '#')
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     [TestMethod]
@@ -251,8 +301,13 @@ public class Day17
                 _sprite.Pos -= Direction(); // restore
                 return;
             }
+            Box<int>? overlap = _solids.Intersection(_sprite.SpriteArea);
+            if (overlap is not null)
+            {
+                bool isInto = _solids.IsInto(_sprite);
+            }
 
-            Box<int> overlap = _walls.Intersection(_sprite.SpriteArea);
+            
 
             Pos<int> Direction() => _jetStream[_jetIndex] switch
             {

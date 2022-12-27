@@ -19,7 +19,7 @@ public class TestCommon
         //Assert.ThrowsException<ArgumentException>(() => new Box<int>(new Pos<int>(0, 3), new Pos<int>(3, 2)));
 
         var window = new Box<int>(new Pos<int>(0, 0), new Pos<int>(3, 3));
-        
+
         // Test IsInside
         Assert.IsTrue(window.Contains(new Pos<int>(1, 1)));
 
@@ -39,10 +39,36 @@ public class TestCommon
         // Test Width
         Assert.AreEqual(4, new Box<int>(new Pos<int>(-1, 0), new Pos<int>(2, 0)).Width);
         Assert.AreEqual(3, new Box<int>(new Pos<int>(1, 0), new Pos<int>(3, 0)).Width);
+        Assert.AreEqual(7, new Box<int>(7, 0).Width);
+        Assert.AreEqual(8, new Box<int>(8, 7).Width);
 
         // Test Height
         Assert.AreEqual(4, new Box<int>(new Pos<int>(0, -1), new Pos<int>(0, 2)).Height);
         Assert.AreEqual(3, new Box<int>(new Pos<int>(0, 1), new Pos<int>(0, 3)).Height);
+
+        Box<int> B() => new Box<int>(5, 5);
+        Assert.IsTrue(B().Contains(new Box<int>(5, 5)));
+        Assert.IsFalse(B().Contains(new Box<int>(6, 5)));
+        Assert.IsFalse(B().Contains(new Box<int>(5, 6)));
+        {
+            var c = B();
+            c.IncreaseToPoint(new Pos<int>(0, -1));
+            Assert.IsFalse(B().Contains(c));
+        }
+        {
+            var c = B();
+            c.IncreaseToPoint(new Pos<int>(-1, 0));
+            Assert.IsFalse(B().Contains(c));
+        }
+
+        {
+            var a = B().Translate(new Pos<int>(-1, -1));
+            var b = B().Translate(new Pos<int>(2, 2));
+            Assert.AreEqual(new Box<int>(new Pos<int>(2, 2), new Pos<int>(3, 3)), a.Intersection(b));
+
+            Assert.AreEqual(new Box<int>(5, 2), B().Intersection(B().Translate(new Pos<int>(0, -3))));
+            Assert.AreEqual(new Box<int>(2, 5), B().Intersection(B().Translate(new Pos<int>(-3, 0))));
+        }
     }
 
     [TestMethod]

@@ -1,5 +1,6 @@
-using Advent_of_Code_2022.Commons;
+﻿using Advent_of_Code_2022.Commons;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static Advent_of_Code_2022.Day17;
 
@@ -72,7 +73,7 @@ public class Day17
             return result.ToString();
         }
 
-        internal bool IsInside(Pos<int> p)
+        internal bool Contains(Pos<int> p)
         {
             return SpriteArea.Contains(p);
         }
@@ -96,13 +97,14 @@ public class Day17
         {
             get
             {
+                Assert.IsTrue(Contains(p));
                 return _solids[-p.y][p.x];
             }
         }
 
-        public bool IsInside(Pos<int> p)
+        public bool Contains(Pos<int> p)
         {
-            var box = new Box<int>(Width, Height);
+            var box = new Box<int>(Width, Height).Translate(new Pos<int>(0, -Height + 1));
             return box.Contains(p);
         }
 
@@ -207,7 +209,7 @@ public class Day17
         };
         
         private readonly string _jetStream;
-        private readonly Box<int> _walls = new(new Pos<int>(0,0), new Pos<int>(7,0));
+        private readonly Box<int> _walls = new(7, 3);
         private readonly Solids _solids;
         private int _rockIndex = -1;
         private int _jetIndex = -1;
@@ -223,24 +225,46 @@ public class Day17
         
         public void NextRock()
         {
+            Console.WriteLine("NextRock");
             _rockIndex = (_rockIndex + 1) % _rockForms.Count;
             // left edge is two units away from the left wall
             // its bottom edge is three units above the highest rock in the room (or the floor, if there isn't one).
             _sprite = new Rock(_rockForms[_rockIndex]);
-            _sprite.Pos = new Pos<int>(2,  -_solids.HighestSolid() - _sprite.Height - 3);
+            _sprite.Pos = new Pos<int>(2,  -_solids.HighestSolid() - (_sprite.Height - 1) - 3);
             
             _walls.IncreaseToPoint(_sprite.Pos);
         }
 
         public void Push()
         {
+            Console.WriteLine("Push");
+            Assert.IsNotNull(_sprite);
+
             //  being pushed by a jet of hot gas one unit (in the direction indicated by the next symbol in the jet pattern)
             // If any movement would cause any part of the rock to move into the walls, floor, or a stopped rock, the movement instead does not occur.
-            
+            _jetIndex = (_jetIndex + 1) % _jetStream.Length;
+
+            _sprite.Pos += Direction();
+
+            if (!_walls.Contains(_sprite.SpriteArea))
+            {
+                _sprite.Pos -= Direction(); // restore
+                return;
+            }
+
+            Box<int> overlap = _walls.Intersection(_sprite.SpriteArea);
+
+            Pos<int> Direction() => _jetStream[_jetIndex] switch
+            {
+                '>' => new Pos<int>(1, 0),
+                '<' => new Pos<int>(0, 1),
+                _ => new Pos<int>(0, 0)
+            };
         }
 
         public void Fall()
         {
+            Console.WriteLine("Fall");
             // falling one unit down.
             // If any movement would cause any part of the rock to move into the walls, floor, or a stopped rock, the movement instead does not occur.
             // If a downward movement would have caused a falling rock to move into the floor or an already-fallen rock, the falling rock stops where it is (having landed on something) and a new rock immediately begins falling.
@@ -261,23 +285,21 @@ public class Day17
                     for (int x = _walls.Min.x; x <= _walls.Max.x; x++)
                     {
                         var p = new Pos<int>(x, y);
-                        
-                        if (_sprite is not null && _sprite.IsInside(p))
+
+                        var isSquare = false;
+                        if (_sprite is not null && _sprite.Contains(p))
                         {
                             var q = p - _sprite.SpriteArea.Min;
                             if (_sprite[q] == '#')
                             {
-                                result.Append('@');
+                                isSquare = true;
                             }
                         }
-                        else if (_solids[p] == '#')
+                        else if (_solids.Contains(p) && _solids[p] == '#')
                         {
-                            result.Append('#');
+                            isSquare = true;
                         }
-                        else
-                        {
-                            result.Append('.');
-                        }
+                        result.Append(isSquare ? '■' : '·');
                     }
                     result.Append('|');
                 }
@@ -335,7 +357,13 @@ public class Day17
         var chamber = new Chamber(">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>");
 
         chamber.NextRock();
+        Console.WriteLine(chamber.ToString());
+        chamber.Push();
+        Console.WriteLine(chamber.ToString());
+        chamber.Fall();
+        Console.WriteLine(chamber.ToString());
         chamber.NextRock();
+        Console.WriteLine(chamber.ToString());
         chamber.NextRock();
         Assert.AreEqual("moop", chamber.ToString());
         var rock = Rock.FromString("""

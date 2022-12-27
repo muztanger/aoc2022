@@ -59,6 +59,28 @@ public class Box<T>: IEquatable<Box<T>>
         return true;
     }
 
+    public bool Contains(Box<T> box)
+    {
+        if (box.Min.x < Min.x || box.Max.x > Max.x)
+        {
+            return false;
+        }
+        if (box.Min.y < Min.y || box.Max.y > Max.y)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public Box<T>? Intersection(Box<T> other)
+    {
+        if (Max.x < other.Min.x || other.Max.x < Min.x) return null;
+        if (Max.y < other.Min.y || other.Max.y < Min.y) return null;
+        var max = new Pos<T>(T.Min(Max.x, other.Max.x), T.Min(Max.y, other.Max.y));
+        var min = new Pos<T>(T.Max(Min.x, other.Min.x), T.Max(Min.y, other.Min.y));
+        return new Box<T>(min, max);
+    }
+
     public Box<T> Translate(Pos<T> dp)
     {
         var result = new Box<T>(this);

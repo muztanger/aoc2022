@@ -21,20 +21,20 @@ public class TestCommon
         var window = new Box<int>(new Pos<int>(0, 0), new Pos<int>(3, 3));
         
         // Test IsInside
-        Assert.IsTrue(window.IsInside(new Pos<int>(1, 1)));
+        Assert.IsTrue(window.Contains(new Pos<int>(1, 1)));
 
         for (int x = window.Min.x; x <= window.Max.x; x++)
         {
             for (int y = window.Min.y; y <= window.Max.y; y++)
             {
-                Assert.IsTrue(window.IsInside(new Pos<int>(x, y)));
+                Assert.IsTrue(window.Contains(new Pos<int>(x, y)));
             }
         }
 
-        Assert.IsFalse(window.IsInside(new Pos<int>(-1, 1)));
-        Assert.IsFalse(window.IsInside(new Pos<int>(4, 1)));
-        Assert.IsFalse(window.IsInside(new Pos<int>(1, -1)));
-        Assert.IsFalse(window.IsInside(new Pos<int>(1, 4)));
+        Assert.IsFalse(window.Contains(new Pos<int>(-1, 1)));
+        Assert.IsFalse(window.Contains(new Pos<int>(4, 1)));
+        Assert.IsFalse(window.Contains(new Pos<int>(1, -1)));
+        Assert.IsFalse(window.Contains(new Pos<int>(1, 4)));
 
         // Test Width
         Assert.AreEqual(4, new Box<int>(new Pos<int>(-1, 0), new Pos<int>(2, 0)).Width);

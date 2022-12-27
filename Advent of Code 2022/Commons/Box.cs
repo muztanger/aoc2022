@@ -22,6 +22,17 @@ public class Box<T>: IEquatable<Box<T>>
         }
     }
 
+    public Box(T width, T height) :
+        this(new Pos<T>(T.Zero, T.Zero), new Pos<T>(width - T.One, height - T.One))
+    {
+    }
+
+    public Box(Box<T> other)
+    {
+        Min = new Pos<T>(other.Min);
+        Max = new Pos<T>(other.Max);
+    }
+
     public void IncreaseToPoint(Pos<T> p)
     {
         Min.x = T.Min(Min.x, p.x);
@@ -35,7 +46,7 @@ public class Box<T>: IEquatable<Box<T>>
         return $"[{Min}, {Max}]";
     }
 
-    public bool IsInside(Pos<T> pos)
+    public bool Contains(Pos<T> pos)
     {
         if (pos.x < Min.x || pos.x > Max.x)
         {
@@ -46,6 +57,14 @@ public class Box<T>: IEquatable<Box<T>>
             return false;
         }
         return true;
+    }
+
+    public Box<T> Translate(Pos<T> dp)
+    {
+        var result = new Box<T>(this);
+        result.Max += dp;
+        result.Min += dp;
+        return result;
     }
 
     public override bool Equals(object? obj)

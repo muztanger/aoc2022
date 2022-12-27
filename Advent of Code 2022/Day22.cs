@@ -105,7 +105,7 @@ public class Day22
                 for (int i = 0; i < instruction.Count; i++)
                 {
                     var next = pos + dir;
-                    if (mapSize.IsInside(next))
+                    if (mapSize.Contains(next))
                     {
                         var c = map[next.y][next.x];
                         if (c == '.')
@@ -121,11 +121,11 @@ public class Day22
                             while (c == ' ')
                             {
                                 next += dir;
-                                if (!mapSize.IsInside(next))
+                                if (!mapSize.Contains(next))
                                 {
                                     next.x = (next.x + width) % width;
                                     next.y = (next.y + height) % height;
-                                    Assert.IsTrue(mapSize.IsInside(next));
+                                    Assert.IsTrue(mapSize.Contains(next));
                                 }
                                 c = map[next.y][next.x];
                             }
@@ -148,11 +148,11 @@ public class Day22
                         while (c == ' ')
                         {
                             next += dir;
-                            if (!mapSize.IsInside(next))
+                            if (!mapSize.Contains(next))
                             {
                                 next.x = (next.x + width) % width;
                                 next.y = (next.y + height) % height;
-                                Assert.IsTrue(mapSize.IsInside(next));
+                                Assert.IsTrue(mapSize.Contains(next));
                             }
                             c = map[next.y][next.x];
                         }
@@ -316,7 +316,7 @@ public class Day22
                 for (int i = 0; i < instruction.Count; i++)
                 {
                     var next = pos + dir;
-                    if (mapSize.IsInside(next))
+                    if (mapSize.Contains(next))
                     {
                         var c = map[next.y][next.x];
                         if (c == '.')
@@ -332,11 +332,11 @@ public class Day22
                             while (c == ' ')
                             {
                                 next += dir;
-                                if (!mapSize.IsInside(next))
+                                if (!mapSize.Contains(next))
                                 {
                                     next.x = (next.x + width) % width;
                                     next.y = (next.y + height) % height;
-                                    Assert.IsTrue(mapSize.IsInside(next));
+                                    Assert.IsTrue(mapSize.Contains(next));
                                 }
                                 c = map[next.y][next.x];
                             }
@@ -359,11 +359,11 @@ public class Day22
                         while (c == ' ')
                         {
                             next += dir;
-                            if (!mapSize.IsInside(next))
+                            if (!mapSize.Contains(next))
                             {
                                 next.x = (next.x + width) % width;
                                 next.y = (next.y + height) % height;
-                                Assert.IsTrue(mapSize.IsInside(next));
+                                Assert.IsTrue(mapSize.Contains(next));
                             }
                             c = map[next.y][next.x];
                         }

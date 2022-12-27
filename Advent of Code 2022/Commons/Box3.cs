@@ -36,6 +36,6 @@ public class Box3<T> where T : INumber<T>
 
     public bool IsInside(Pos3<T> pos)
     {
-        return XYPlane.IsInside(pos.XY) && YZPlane.IsInside(pos.YZ);
+        return XYPlane.Contains(pos.XY) && YZPlane.Contains(pos.YZ);
     }
 }

@@ -13,7 +13,9 @@ public class Day12
         public Grid(List<List<int>> grid)
         {
             _gridList = grid;
-            _gridBorders = new Box<int>(new(0, 0), new(grid.First().Count - 1, grid.Count - 1));
+            int width = grid.First().Count;
+            int height = grid.Count;
+            _gridBorders = new Box<int>(width, height);
         }
 
         public int this[Pos<int> p]
@@ -31,18 +33,18 @@ public class Day12
 
         public bool IsInside(Pos<int> p)
         {
-            return _gridBorders.IsInside(p);
+            return _gridBorders.Contains(p);
         }
 
         public bool MoveNext()
         {
             _index.x++;
-            if (!_gridBorders.IsInside(_index))
+            if (!_gridBorders.Contains(_index))
             {
                 _index.x = 0;
                 _index.y++;
             }
-            if (!_gridBorders.IsInside(_index))
+            if (!_gridBorders.Contains(_index))
             {
                 return false;
             }

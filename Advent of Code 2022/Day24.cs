@@ -34,7 +34,7 @@ public class Day24
             foreach (var blizard in Blizards)
             {
                 var next = blizard.Pos + blizard.Dir * Math.Sign(direction);
-                if (InnerArea.IsInside(next))
+                if (InnerArea.Contains(next))
                 {
                     blizard.Next = next;
                 }
@@ -233,7 +233,7 @@ public class Day24
                     isFinished = true;
                     break;
                 }
-                else if (valley.InnerArea.IsInside(next) && !valley.Blizards.Any(b => b.Next == next))
+                else if (valley.InnerArea.Contains(next) && !valley.Blizards.Any(b => b.Next == next))
                 {
                     options.Add(next);
                 }

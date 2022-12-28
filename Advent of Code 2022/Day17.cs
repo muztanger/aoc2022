@@ -85,6 +85,8 @@ public class Day17
         private int Width { get; init; } = 7;
         private int Height => _solids.Count;
 
+        private Box<int> SolidArea => new Box<int>(Width, Height).Translate(new Pos<int>(0, -Height + 1));
+
         public Solids(Box<int> init)
         {
             Width = init.Width;
@@ -93,8 +95,18 @@ public class Day17
                 _solids.Add(Enumerable.Repeat('.', Width).ToList());
             }
         }
+
+        /// <summary>
+        /// Inverting y since negative Chamber y-values are positive in Solids to be able to grow list
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
         public char this[Pos<int> p]
         {
+            set
+            {
+                _solids[-p.y][p.x] = value;
+            }
             get
             {
                 Assert.IsTrue(Contains(p));
@@ -129,14 +141,13 @@ public class Day17
             {
                 _solids.Add(Enumerable.Repeat('.', Width).ToList());
             }
-            var rockPos = new Pos<int>(rock.Pos.x, -rock.Pos.y); // inverted y-axis
             for (int y = rock.Box.Min.y; y <= rock.Box.Max.y; y++)
             {
                 for (int x = rock.Box.Min.x; x <= rock.Box.Max.x; x++)
                 {
                     var p1 = new Pos<int>(x, y);
-                    var p2 = new Pos<int>(x + rockPos.x, rockPos.y - y);
-                    _solids[p2.y][p2.x] = rock[p1];
+                    var p2 = new Pos<int>(x + rock.Pos.x, y + rock.Pos.y);
+                    this[p2] = rock[p1];
                 }
             }
         }
@@ -154,12 +165,12 @@ public class Day17
 
         internal Box<int>? Intersection(Box<int> spriteArea)
         {
-            return new Box<int>(Width, Height).Intersection(spriteArea);
+            return SolidArea.Intersection(spriteArea);
         }
 
         internal bool IsInto(Rock rock)
         {
-            var intersection = new Box<int>(Width, Height).Intersection(rock.SpriteArea);
+            var intersection = SolidArea.Intersection(rock.SpriteArea);
             if (intersection is null) return false;
 
             // 
@@ -184,16 +195,15 @@ public class Day17
             //       4 | ····
             // 
 
-            for (int ny = intersection.Min.y; ny <= intersection.Max.y; ny++)
+            for (int y = intersection.Min.y; y <= intersection.Max.y; y++)
             {
                 for (int x = intersection.Min.x; x <= intersection.Max.x; x++)
                 {
-                    var y = -ny;
                     var i = x - rock.Pos.x;
-                    var j = y - rock.Pos.y;
+                    var j = rock.Height - 1 - (y - rock.Pos.y);
                     var p1 = new Pos<int>(i, j);
-                    var p2 = new Pos<int>(x, y - rock.Pos.y);
-                    if (rock[p1] == '#' && _solids[p2.y][p2.x] == '#')
+                    var p2 = new Pos<int>(x, y);
+                    if (rock[p1] == '#' && this[p2] == '#')
                     {
                         return true;
                     }
@@ -269,6 +279,7 @@ public class Day17
         {
             _jetStream = jetStream;
             var start = new Pos<int>(2, -3);
+            _walls = _walls.Translate(new Pos<int>(0, -_walls.Height + 1));
             _walls.IncreaseToPoint(start);
             _solids = new Solids(_walls);
         }
@@ -280,19 +291,20 @@ public class Day17
             // left edge is two units away from the left wall
             // its bottom edge is three units above the highest rock in the room (or the floor, if there isn't one).
             _sprite = new Rock(_rockForms[_rockIndex]);
-            _sprite.Pos = new Pos<int>(2,  -_solids.HighestSolid() - (_sprite.Height - 1) - 3);
+            int nextY = -_solids.HighestSolid() - (_sprite.Height - 1) - 3;
+            _sprite.Pos = new Pos<int>(2, nextY);
             
             _walls.IncreaseToPoint(_sprite.Pos);
         }
 
         public void Push()
         {
-            Console.WriteLine("Push");
             Assert.IsNotNull(_sprite);
 
             //  being pushed by a jet of hot gas one unit (in the direction indicated by the next symbol in the jet pattern)
             // If any movement would cause any part of the rock to move into the walls, floor, or a stopped rock, the movement instead does not occur.
             _jetIndex = (_jetIndex + 1) % _jetStream.Length;
+            Console.WriteLine($"Push: {_jetStream[_jetIndex]}");
 
             _sprite.Pos += Direction();
 
@@ -302,17 +314,16 @@ public class Day17
                 return;
             }
             Box<int>? overlap = _solids.Intersection(_sprite.SpriteArea);
-            if (overlap is not null)
+            if (overlap is not null && _solids.IsInto(_sprite))
             {
-                bool isInto = _solids.IsInto(_sprite);
+                _sprite.Pos -= Direction(); // restore
+                return;
             }
-
-            
 
             Pos<int> Direction() => _jetStream[_jetIndex] switch
             {
                 '>' => new Pos<int>(1, 0),
-                '<' => new Pos<int>(0, 1),
+                '<' => new Pos<int>(-1, 0),
                 _ => new Pos<int>(0, 0)
             };
         }
@@ -320,9 +331,42 @@ public class Day17
         public void Fall()
         {
             Console.WriteLine("Fall");
+            if (_sprite is null) return;
+            
             // falling one unit down.
             // If any movement would cause any part of the rock to move into the walls, floor, or a stopped rock, the movement instead does not occur.
-            // If a downward movement would have caused a falling rock to move into the floor or an already-fallen rock, the falling rock stops where it is (having landed on something) and a new rock immediately begins falling.
+            // If a downward movement would have caused a falling rock to move into the floor or an already-fallen rock,
+            // the falling rock stops where it is (having landed on something) and a new rock immediately begins falling.
+
+            bool CanMove()
+            {
+                if (_sprite is null) return false;
+
+                Pos<int> down = new Pos<int>(0, 1);
+                
+                _sprite.Pos += down;
+                
+                if (!_walls.Contains(_sprite.SpriteArea))
+                {
+                    _sprite.Pos -= down; // restore
+                    return false;
+                }
+
+                Box<int>? overlap = _solids.Intersection(_sprite.SpriteArea);
+                if (overlap is not null && _solids.IsInto(_sprite))
+                {
+                    _sprite.Pos -= down; // restore
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (!CanMove())
+            {
+                _solids.Add(_sprite);
+                NextRock();
+            }
         }
 
         public override string ToString()
@@ -413,20 +457,19 @@ public class Day17
 
         chamber.NextRock();
         Console.WriteLine(chamber.ToString());
-        chamber.Push();
-        Console.WriteLine(chamber.ToString());
-        chamber.Fall();
-        Console.WriteLine(chamber.ToString());
-        chamber.NextRock();
-        Console.WriteLine(chamber.ToString());
-        chamber.NextRock();
+        for (int i = 0; i < 40; i++)
+        {
+            chamber.Push();
+            Console.WriteLine(chamber.ToString());
+            chamber.Fall();
+            Console.WriteLine(chamber.ToString());
+        }
         Assert.AreEqual("moop", chamber.ToString());
         var rock = Rock.FromString("""
                 ..#
                 ..#
                 ###
                 """);
-
     }
 
     [TestMethod]

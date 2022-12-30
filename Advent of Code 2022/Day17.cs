@@ -12,32 +12,32 @@ public class Day17
     public class Rock
     {
         public int Index {get; set;} = 0;
-        public Pos<int> Pos = new(0, 0);
-        public Box<int> Box => _box;
-        public int Width => _box.Width;
-        public int Height => _box.Height;
-        public Box<int> SpriteArea => _box.Translate(Pos);
+        public Pos<long> Pos = new(0, 0);
+        public Box<long> Box => _box;
+        public long Width => _box.Width;
+        public long Height => _box.Height;
+        public Box<long> SpriteArea => _box.Translate(Pos);
         private List<List<char>> Form => _form;
 
-        Box<int> _box = new Box<int>(new Pos<int>(0, 0));
+        Box<long> _box = new Box<long>(new Pos<long>(0, 0));
         readonly List<List<char>> _form = new List<List<char>>();
 
         public Rock() { }
 
         public Rock(Rock other)
         {
-            Pos = new Pos<int>(other.Pos);
-            _box = new Box<int>(other._box);
+            Pos = new Pos<long>(other.Pos);
+            _box = new Box<long>(other._box);
             _form = new List<List<char>>(other._form);
             Index = other.Index;
         }
 
-        public char this[Pos<int> p]
+        public char this[Pos<long> p]
         {
             get
             {
                 var q = p - Pos;
-                return _form[q.y][q.x];
+                return _form[(int)q.y][(int)q.x];
             }
         }
 
@@ -55,7 +55,7 @@ public class Day17
             }
             int width = rock._form[0].Count;
             int height = rock._form.Count;
-            rock._box = new Box<int>(width, height);
+            rock._box = new Box<long>(width, height);
             return rock;
         }
 
@@ -76,7 +76,7 @@ public class Day17
             return result.ToString();
         }
 
-        internal bool Contains(Pos<int> p)
+        internal bool Contains(Pos<long> p)
         {
             return SpriteArea.Contains(p);
         }
@@ -85,56 +85,126 @@ public class Day17
     public class Solids
     {
         private readonly List<List<char>> _solids = new();
-        private int Width { get; } = 7;
-        private int Height => _solids.Count;
-        private static int N = 5000;
-        private Box<int> SolidArea => new Box<int>(Width, Height);
+        private readonly Box<long> _solidArea;
+        private long Width { get; } = 7;
+        private long Height => N;
+        private static long N = 5000;
+        private const int SolidsRows = 5000;
 
-        public Solids(int N)
+        public Solids(long N)
         {
             Solids.N = N;
-            for (int y = 0; y < N; y++)
+            for (int y = 0; y < SolidsRows; y++)
             {
-                _solids.Add(Enumerable.Repeat('.', Width).ToList());
+                _solids.Add(Enumerable.Repeat('.', (int)Width).ToList());
             }
             LastHighestSolid = N - 1;
+            _solidArea = new Box<long>(Width, Height);
         }
 
-        public char this[Pos<int>  p]
+        public char this[Pos<long>  p]
         {
-            get => _solids[p.y][p.x];
+            // if p.y >= _compressedBottomY return #
+            get => _solids[(int)p.y][(int)p.x];
         }
 
-        public bool Contains(Pos<int> p)
+        public bool Contains(Pos<long> p)
         {
-            var box = new Box<int>(Width, Height);
-            return box.Contains(p);
+            return _solidArea.Contains(p);
         }
 
-        static int LastHighestSolid = N - 1;
-        public int HighestSolid()
+        static long LastHighestSolid = N - 1;
+        private long _compressedBottomY = N;
+        private long _compressedTopY => (_compressedBottomY - SolidsRows);
+        public long HighestSolid()
         {
-            for (int i = LastHighestSolid; i >= 0; i--)
+            var highestSolidIndex = (int)(LastHighestSolid - _compressedTopY);
+            for (var i = highestSolidIndex; i >= 0; i--)
             {
                 if (i < _solids.Count && !_solids[i].Any(c => c != '.'))
                 {
-                    LastHighestSolid = i + 1;
-                    return i + 1;
+                    highestSolidIndex = i + 1;
+                    LastHighestSolid = highestSolidIndex + _compressedBottomY;
+                    break;
                 }
             }
+
+            if (highestSolidIndex <= SolidsRows / 2)
+            {
+                // Try to compress!
+                Console.WriteLine($"Compress since highestSolidIndex={highestSolidIndex}");
+
+                var nextBottomIndex = HighestRowIndex(new Pos<int>(0, highestSolidIndex - 1)) + 1;
+                if (nextBottomIndex < SolidsRows)
+                {
+                    // compress!
+
+                    for (int i = highestSolidIndex; i < nextBottomIndex; i++)
+                    {
+                        _solids[nextBottomIndex + i] = new List<char>(_solids[i]);
+                        _solids[i] = Enumerable.Repeat('.', (int)Width).ToList();
+                    }
+
+                    //for (int i = highestSolidIndex; i < nextBottomIndex)
+                
+                    // new compressed bottom!
+
+                }
+
+
+                // N = 10
+                // SolidsRows = 4
+                // 
+                // Y-pos|solidY
+                // -----+------+    +-------+                                               +-------+
+                //     0|      |    |·······|                                               |·······|
+                //     1|      |    |·······|                                               |·······|
+                //     2|      |    |·······|                                               |·······|
+                //     3|     0|  3 |·······| _compressedTopY = 3                           |·······|
+                //     4|     1|    |·······|                                               |·······| 
+                //     5|     2|    |····#··| highestSolidIndex = 2                         |····#··| 0 highestSolidIndex = 0, compressedTopY = 5                       
+                //     6|     3|    |#··####| LowestRowIndex() = 3                          |#··####| 1 LowestRowIndex = 1
+                //     7|      |  7 |###·#··| nextBottomIndex = 4, _compressedBottomY = 7   |###·#··| 2 nextBottomIndex = 2
+                //     8|      |    |··####·|                                               |··####·| 3
+                //     9|      |    |·####··|                                               |·####··|   compressedBottomY = 9
+                // -----+------+ 10 +-------+                                               +-------+
+
+                int HighestRowIndex(Pos<int> pos)
+                {
+                    var directions = new List<Pos<int>> { new(1, 0), new(0, 1), new(-1, 0) };
+                    int highestRowIndex = pos.y;
+                    foreach (var dp in directions)
+                    {
+                        var next = pos + dp;
+                        
+                        if (next.x >= 0 && next.x < Width && next.y < SolidsRows && _solids[next.y][next.x] == '.')
+                        {
+                            var nextY = HighestRowIndex(next);
+                            if (nextY is int rowIndex)
+                            {
+                                highestRowIndex = int.Max(highestRowIndex, rowIndex); // higher value => closer to bottom
+                            }
+                        }
+                    }
+                    return highestRowIndex;
+                }
+            }
+
+
+
             throw new NotImplementedException();
         }
 
         public void Add(Rock rock)
         {
-            for (int y = rock.SpriteArea.Min.y; y <= rock.SpriteArea.Max.y; y++)
+            for (long y = rock.SpriteArea.Min.y; y <= rock.SpriteArea.Max.y; y++)
             {
-                for (int x = rock.SpriteArea.Min.x; x <= rock.SpriteArea.Max.x; x++)
+                for (long x = rock.SpriteArea.Min.x; x <= rock.SpriteArea.Max.x; x++)
                 {
-                    var p = new Pos<int>(x, y);
+                    var p = new Pos<long>(x, y);
                     if (rock[p] != '.')
                     {
-                        _solids[y][x] = rock.Index.ToString()[0];
+                        _solids[(int)y][(int)x] = rock.Index.ToString()[0];
                     }
                 }
             }
@@ -144,25 +214,25 @@ public class Day17
         {
             var result = new StringBuilder();
             var yStart = HighestSolid();
-            for (int y = yStart; y < _solids.Count; y++)
+            for (long y = yStart; y < _solids.Count; y++)
             {
                 if (result.Length > 0) result.AppendLine();
-                result.Append(string.Concat(_solids[y]));
+                result.Append(string.Concat(_solids[(int)y]));
             }
             return result.ToString();
         }
 
         internal bool IsInto(Rock rock)
         {
-            var intersection = SolidArea.Intersection(rock.SpriteArea);
+            var intersection = _solidArea.Intersection(rock.SpriteArea);
             if (intersection is null) return false;
 
-            for (int y = intersection.Min.y; y <= intersection.Max.y; y++)
+            for (long y = intersection.Min.y; y <= intersection.Max.y; y++)
             {
-                for (int x = intersection.Min.x; x <= intersection.Max.x; x++)
+                for (long x = intersection.Min.x; x <= intersection.Max.x; x++)
                 {
-                    var p = new Pos<int>(x, y);
-                    if (rock[p] == '#' && _solids[y][x] != '.')
+                    var p = new Pos<long>(x, y);
+                    if (rock[p] == '#' && _solids[(int)y][(int)x] != '.')
                     {
                         return true;
                     }
@@ -181,7 +251,7 @@ public class Day17
             ###.
             ..##
             """);
-        rock1.Pos = new Pos<int>(2, 0);
+        rock1.Pos = new Pos<long>(2, 0);
         solids.Add(rock1);
         Assert.AreEqual("""
             ....#..
@@ -227,9 +297,9 @@ public class Day17
                 """),
         };
         
-        private const int N = 5000;
+        private const long N = 5000;
         private readonly string _jetStream;
-        private readonly Box<int> _walls = new(7, N);
+        private readonly Box<long> _walls = new(7, N);
         private readonly Solids _solids;
         private int _rockIndex = -1;
         private int _jetIndex = -1;
@@ -252,8 +322,8 @@ public class Day17
             // left edge is two units away from the left wall
             // its bottom edge is three units above the highest rock in the room (or the floor, if there isn't one).
             _sprite = new Rock(_rockForms[_rockIndex]);
-            int nextY = _solids.HighestSolid() - _sprite.Height - 3;
-            _sprite.Pos = new Pos<int>(2, nextY);
+            long nextY = _solids.HighestSolid() - _sprite.Height - 3;
+            _sprite.Pos = new Pos<long>(2, nextY);
             
             _walls.IncreaseToPoint(_sprite.Pos);
         }
@@ -282,11 +352,11 @@ public class Day17
                 return;
             }
 
-            Pos<int> Direction() => _jetStream[_jetIndex] switch
+            Pos<long> Direction() => _jetStream[_jetIndex] switch
             {
-                '>' => new Pos<int>(1, 0),
-                '<' => new Pos<int>(-1, 0),
-                _ => new Pos<int>(0, 0)
+                '>' => new Pos<long>(1, 0),
+                '<' => new Pos<long>(-1, 0),
+                _ => new Pos<long>(0, 0)
             };
         }
 
@@ -304,7 +374,7 @@ public class Day17
             {
                 if (_sprite is null) return false;
 
-                Pos<int> down = new Pos<int>(0, 1);
+                Pos<long> down = new Pos<long>(0, 1);
                 
                 _sprite.Pos += down;
                 
@@ -336,7 +406,7 @@ public class Day17
         public override string ToString()
         {
             var result = new StringBuilder();
-            for (int y = Math.Min(_sprite?.Pos.y ?? N - 1, _solids.HighestSolid()); y <= _walls.Max.y + 1; y++)
+            for (long y = Math.Min(_sprite?.Pos.y ?? N - 1, _solids.HighestSolid()); y <= _walls.Max.y + 1; y++)
             {
                 if (result.Length > 0)
                 {
@@ -345,9 +415,9 @@ public class Day17
                 if (y <= _walls.Max.y)
                 {
                     result.Append('|');
-                    for (int x = _walls.Min.x; x <= _walls.Max.x; x++)
+                    for (long x = _walls.Min.x; x <= _walls.Max.x; x++)
                     {
-                        var p = new Pos<int>(x, y);
+                        var p = new Pos<long>(x, y);
 
                         if (_sprite is not null && _sprite.Contains(p) && _sprite[p] == '#')
                         {
@@ -368,7 +438,7 @@ public class Day17
                 else
                 {
                     result.Append('+');
-                    for (int x = _walls.Min.x; x <= _walls.Max.x; x++)
+                    for (long x = _walls.Min.x; x <= _walls.Max.x; x++)
                     {
                         result.Append('-');
                     }
@@ -378,7 +448,7 @@ public class Day17
             return result.ToString();
         }
 
-        internal int HighestRock()
+        internal long HighestRock()
         {
             return N - _solids.HighestSolid();
         }
@@ -386,7 +456,6 @@ public class Day17
 
     private static string Part1(IEnumerable<string> input)
     {
-        var result = new StringBuilder();
         var chamber = new Chamber(input.First().Trim());
         chamber.NextRock();
         var expectedCount = 2022;
@@ -405,17 +474,34 @@ public class Day17
             }
         }
         Assert.AreEqual(expectedCount, stopCount);
-        int y = chamber.HighestRock();
+        var y = chamber.HighestRock();
         return y.ToString();
     }
     
     private static string Part2(IEnumerable<string> input)
     {
-        var result = new StringBuilder();
-        foreach (var line in input)
+        // N = 1000000000000... impossible.
+        // Need to compact the solids and rembember the size.
+        var chamber = new Chamber(input.First().Trim());
+        chamber.NextRock();
+        var expectedCount = 1000000000000;
+        var stopCount = 0L;
+        for (long i = 0; i < expectedCount * 10 && stopCount != expectedCount; i++)
         {
+            chamber.Push();
+            if (!chamber.Fall())
+            {
+                stopCount++;
+                if (stopCount == 1000000000000)
+                {
+                    Console.WriteLine("Count: " + stopCount);
+                    Console.WriteLine(chamber.ToString());
+                }
+            }
         }
-        return result.ToString();
+        Assert.AreEqual(expectedCount, stopCount);
+        var y = chamber.HighestRock();
+        return y.ToString();
     }
 
     [TestMethod]
@@ -426,7 +512,7 @@ public class Day17
                 ###
                 .#.
                 """);
-        Assert.AreEqual(new Box<int>(new Pos<int>(0, 0), new Pos<int>(3, 3)), rock.Box);
+        Assert.AreEqual(new Box<long>(new Pos<long>(0, 0), new Pos<long>(3, 3)), rock.Box);
         Assert.AreEqual("""
                 .#.
                 ###
@@ -498,7 +584,7 @@ public class Day17
     {
         var result = Part1(Common.DayInput(nameof(Day17)));
         Assert.AreNotEqual("3023", result); // too low
-        Assert.AreEqual("", result);
+        Assert.AreEqual("3048", result);
     }
     
     [TestMethod]

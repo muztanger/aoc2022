@@ -1,5 +1,6 @@
 ﻿using Advent_of_Code_2022.Commons;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static Advent_of_Code_2022.Day17;
@@ -82,14 +83,20 @@ public class Day17
         }
     }
 
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class Solids
     {
-        private readonly List<List<char>> _solids = new();
-        private readonly Box<long> _solidArea;
+        static long LastHighestSolid = N - 1;
+
         private long Width { get; } = 7;
         private long Height => N;
+        private long _compressedTopY => _compressedBottomY - SolidsRows;
+
+        private readonly List<List<char>> _solids = new();
+        private readonly Box<long> _solidArea;
         private static long N = 5000;
-        private const int SolidsRows = 5000;
+        private const int SolidsRows = 500; // 5000
+        private long _compressedBottomY = N;
 
         public Solids(long N)
         {
@@ -98,58 +105,60 @@ public class Day17
             {
                 _solids.Add(Enumerable.Repeat('.', (int)Width).ToList());
             }
-            LastHighestSolid = N - 1;
+            LastHighestSolid = N;
             _solidArea = new Box<long>(Width, Height);
         }
 
         public char this[Pos<long>  p]
         {
-            // if p.y >= _compressedBottomY return #
-            get => _solids[(int)p.y][(int)p.x];
+            get
+            {
+                if (p.y < _compressedTopY || p.y >= _compressedBottomY) throw new ArgumentException(p.ToString(), nameof(p));
+                int x = (int)p.x;
+                int y = (int)(p.y - _compressedTopY);
+                return _solids[y][x];
+            }
         }
 
         public bool Contains(Pos<long> p)
         {
-            return _solidArea.Contains(p);
+            return _solidArea.Contains(p) && p.y < _compressedBottomY && p.y >= _compressedTopY;
         }
 
-        static long LastHighestSolid = N - 1;
-        private long _compressedBottomY = N;
-        private long _compressedTopY => (_compressedBottomY - SolidsRows);
-        public long HighestSolid()
+        public bool TryCompress()
         {
-            var highestSolidIndex = (int)(LastHighestSolid - _compressedTopY);
-            for (var i = highestSolidIndex; i >= 0; i--)
-            {
-                if (i < _solids.Count && !_solids[i].Any(c => c != '.'))
-                {
-                    highestSolidIndex = i + 1;
-                    LastHighestSolid = highestSolidIndex + _compressedBottomY;
-                    break;
-                }
-            }
+            var isCompressed = false;
 
+            var highestSolidIndex = (int)(HighestSolid() - _compressedTopY);
             if (highestSolidIndex <= SolidsRows / 2)
             {
+                isCompressed = true;
                 // Try to compress!
                 Console.WriteLine($"Compress since highestSolidIndex={highestSolidIndex}");
 
                 var nextBottomIndex = HighestRowIndex(new Pos<int>(0, highestSolidIndex - 1)) + 1;
+                Console.WriteLine($"   nextBottomIndex={nextBottomIndex}");
                 if (nextBottomIndex < SolidsRows)
                 {
-                    // compress!
-
-                    for (int i = highestSolidIndex; i < nextBottomIndex; i++)
+                    var diff = SolidsRows - nextBottomIndex;
+                    int j = SolidsRows - 1;
+                    var from = j - diff;
+                    for (; j >= 0 && from != highestSolidIndex; j--)
                     {
-                        _solids[nextBottomIndex + i] = new List<char>(_solids[i]);
-                        _solids[i] = Enumerable.Repeat('.', (int)Width).ToList();
+                        from = j - diff;
+                        _solids[j] = _solids[from];
+                    }
+                    for (; j >= highestSolidIndex; j--)
+                    {
+                        _solids[j] = Enumerable.Repeat('.', (int)Width).ToList();
                     }
 
-                    //for (int i = highestSolidIndex; i < nextBottomIndex)
-                
                     // new compressed bottom!
+                    _compressedBottomY -= diff;
 
+                    Assert.IsTrue(_compressedTopY > 0);
                 }
+                Console.WriteLine($"   _compressedBottomY={_compressedBottomY}");
 
 
                 // N = 10
@@ -171,28 +180,56 @@ public class Day17
 
                 int HighestRowIndex(Pos<int> pos)
                 {
+                    Console.WriteLine($"HighestRowIndex: Start at {pos}");
                     var directions = new List<Pos<int>> { new(1, 0), new(0, 1), new(-1, 0) };
+                    directions.Reverse(); // since we are using a stack
                     int highestRowIndex = pos.y;
-                    foreach (var dp in directions)
+                    var visited = new HashSet<Pos<int>>();
+                    var stack = new Stack<Pos<int>>();
+                    stack.Push(pos);
+                    while (stack.TryPeek(out _))
                     {
-                        var next = pos + dp;
-                        
-                        if (next.x >= 0 && next.x < Width && next.y < SolidsRows && _solids[next.y][next.x] == '.')
+                        var p = stack.Pop();
+                        Console.Write($"\t{p}");
+                        highestRowIndex = int.Max(highestRowIndex, p.y);
+                        visited.Add(p);
+                        foreach (var dp in directions)
                         {
-                            var nextY = HighestRowIndex(next);
-                            if (nextY is int rowIndex)
+                            var next = p + dp;
+                            if (!visited.Contains(next)
+                                && next.x >= 0 
+                                && next.x < Width 
+                                && next.y < SolidsRows
+                                && _solids[next.y][next.x] == '.')
                             {
-                                highestRowIndex = int.Max(highestRowIndex, rowIndex); // higher value => closer to bottom
+                                stack.Push(next);
                             }
                         }
+                        //visited.Add(pos);
                     }
+                    Console.WriteLine();
+                    Console.WriteLine($" End at: {highestRowIndex}");
                     return highestRowIndex;
                 }
             }
 
+            return isCompressed;
+        }
 
+        public long HighestSolid()
+        {
+            var highestSolidIndex = (int)(LastHighestSolid - _compressedTopY);
+            for (var i = highestSolidIndex; i >= 0; i--)
+            {
+                if (i < _solids.Count && !_solids[i].Any(c => c != '.'))
+                {
+                    highestSolidIndex = i + 1;
+                    LastHighestSolid = highestSolidIndex + _compressedTopY;
+                    break;
+                }
+            }
 
-            throw new NotImplementedException();
+            return LastHighestSolid;
         }
 
         public void Add(Rock rock)
@@ -204,7 +241,7 @@ public class Day17
                     var p = new Pos<long>(x, y);
                     if (rock[p] != '.')
                     {
-                        _solids[(int)y][(int)x] = rock.Index.ToString()[0];
+                        _solids[(int)(y - _compressedTopY)][(int)x] = rock.Index.ToString()[0];
                     }
                 }
             }
@@ -213,13 +250,30 @@ public class Day17
         override public string ToString()
         {
             var result = new StringBuilder();
-            var yStart = HighestSolid();
-            for (long y = yStart; y < _solids.Count; y++)
+            var yStart = (int)(HighestSolid() - _compressedTopY);
+            Assert.IsTrue(yStart >= 0);
+            for (int y = yStart; y < _solids.Count; y++)
             {
                 if (result.Length > 0) result.AppendLine();
                 result.Append(string.Concat(_solids[(int)y]));
             }
             return result.ToString();
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
+                var result = new StringBuilder();
+                var yStart = _solids.Count - 20;
+                Assert.IsTrue(yStart >= 0);
+                for (int y = yStart; y < _solids.Count; y++)
+                {
+                    if (result.Length > 0) result.AppendLine();
+                    result.Append(string.Concat(_solids[(int)y]));
+                }
+                return result.ToString();
+            }
         }
 
         internal bool IsInto(Rock rock)
@@ -232,7 +286,7 @@ public class Day17
                 for (long x = intersection.Min.x; x <= intersection.Max.x; x++)
                 {
                     var p = new Pos<long>(x, y);
-                    if (rock[p] == '#' && _solids[(int)y][(int)x] != '.')
+                    if (rock[p] == '#' && _solids[(int)(y - _compressedTopY)][(int)x] != '.')
                     {
                         return true;
                     }
@@ -396,6 +450,7 @@ public class Day17
             if (!CanMove())
             {
                 _solids.Add(_sprite);
+                var isCompressed = _solids.TryCompress();
                 NextRock();
                 return false;
             }
@@ -405,6 +460,7 @@ public class Day17
 
         public override string ToString()
         {
+            //TODO think about compressed range of solids
             var result = new StringBuilder();
             for (long y = Math.Min(_sprite?.Pos.y ?? N - 1, _solids.HighestSolid()); y <= _walls.Max.y + 1; y++)
             {

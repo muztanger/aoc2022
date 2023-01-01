@@ -5,8 +5,7 @@
     <RootNamespace>Advent_of_Code_2022</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
-    <IsPackable>false</IsPackable>
+	<IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

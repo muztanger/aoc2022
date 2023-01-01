@@ -94,7 +94,7 @@ public class Day17
 
         private readonly List<List<char>> _solids = new();
         private readonly Box<long> _solidArea;
-        private static long N = 5000;
+        private static long N = 2500000000000L;
         private const int SolidsRows = 500; // 5000
         private long _compressedBottomY = N;
 
@@ -134,10 +134,10 @@ public class Day17
             {
                 isCompressed = true;
                 // Try to compress!
-                Console.WriteLine($"Compress since highestSolidIndex={highestSolidIndex}");
+                //Console.WriteLine($"Compress since highestSolidIndex={highestSolidIndex}");
 
                 var nextBottomIndex = HighestRowIndex(new Pos<int>(0, highestSolidIndex - 1)) + 1;
-                Console.WriteLine($"   nextBottomIndex={nextBottomIndex}");
+                //Console.WriteLine($"   nextBottomIndex={nextBottomIndex}");
                 if (nextBottomIndex < SolidsRows)
                 {
                     var diff = SolidsRows - nextBottomIndex;
@@ -156,9 +156,9 @@ public class Day17
                     // new compressed bottom!
                     _compressedBottomY -= diff;
 
-                    Assert.IsTrue(_compressedTopY > 0);
+                    Assert.IsTrue(_compressedTopY >= 0);
                 }
-                Console.WriteLine($"   _compressedBottomY={_compressedBottomY}");
+                //Console.WriteLine($"   _compressedBottomY={_compressedBottomY}");
 
 
                 // N = 10
@@ -180,19 +180,22 @@ public class Day17
 
                 int HighestRowIndex(Pos<int> pos)
                 {
-                    Console.WriteLine($"HighestRowIndex: Start at {pos}");
+                    //Console.WriteLine($"HighestRowIndex: Start at {pos}");
+                    
                     var directions = new List<Pos<int>> { new(1, 0), new(0, 1), new(-1, 0) };
                     directions.Reverse(); // since we are using a stack
-                    int highestRowIndex = pos.y;
-                    var visited = new HashSet<Pos<int>>();
+                    
                     var stack = new Stack<Pos<int>>();
+                    var visited = new HashSet<Pos<int>>();
+                    int highestRowIndex = pos.y;
                     stack.Push(pos);
                     while (stack.TryPeek(out _))
                     {
                         var p = stack.Pop();
-                        Console.Write($"\t{p}");
+                        //Console.Write($"\t{p}");
                         highestRowIndex = int.Max(highestRowIndex, p.y);
                         visited.Add(p);
+
                         foreach (var dp in directions)
                         {
                             var next = p + dp;
@@ -205,10 +208,9 @@ public class Day17
                                 stack.Push(next);
                             }
                         }
-                        //visited.Add(pos);
                     }
-                    Console.WriteLine();
-                    Console.WriteLine($" End at: {highestRowIndex}");
+                    //Console.WriteLine();
+                    //Console.WriteLine($" End at: {highestRowIndex}");
                     return highestRowIndex;
                 }
             }
@@ -286,6 +288,7 @@ public class Day17
                 for (long x = intersection.Min.x; x <= intersection.Max.x; x++)
                 {
                     var p = new Pos<long>(x, y);
+                    //Console.WriteLine(intersection);
                     if (rock[p] == '#' && _solids[(int)(y - _compressedTopY)][(int)x] != '.')
                     {
                         return true;
@@ -350,8 +353,8 @@ public class Day17
                 ##
                 """),
         };
-        
-        private const long N = 5000;
+                               
+        private const long N = 2500000000000L;
         private readonly string _jetStream;
         private readonly Box<long> _walls = new(7, N);
         private readonly Solids _solids;
@@ -540,7 +543,7 @@ public class Day17
         // Need to compact the solids and rembember the size.
         var chamber = new Chamber(input.First().Trim());
         chamber.NextRock();
-        var expectedCount = 1000000000000;
+        var expectedCount = 1000000000000L;
         var stopCount = 0L;
         for (long i = 0; i < expectedCount * 10 && stopCount != expectedCount; i++)
         {
@@ -548,10 +551,10 @@ public class Day17
             if (!chamber.Fall())
             {
                 stopCount++;
-                if (stopCount == 1000000000000)
+                if (stopCount == 1000000000000L)
                 {
                     Console.WriteLine("Count: " + stopCount);
-                    Console.WriteLine(chamber.ToString());
+                    //Console.WriteLine(chamber.ToString());
                 }
             }
         }

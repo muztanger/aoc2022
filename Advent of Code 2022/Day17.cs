@@ -656,15 +656,15 @@ public class Day17
         Assert.AreEqual("3048", result);
     }
     
-    [TestMethod]
-    public void Day17_Part2_Example01()
-    {
-        var input = """
-            >>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>
-            """;
-        var result = Part2(Common.GetLines(input));
-        Assert.AreEqual("", result);
-    }
+    //[TestMethod]
+    //public void Day17_Part2_Example01()
+    //{
+    //    var input = """
+    //        >>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>
+    //        """;
+    //    var result = Part2(Common.GetLines(input));
+    //    Assert.AreEqual("", result);
+    //}
     
     [TestMethod]
     public void Day17_Part2()

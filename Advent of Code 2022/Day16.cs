@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Xml.XPath;
 
 namespace Advent_of_Code_2022;
@@ -114,6 +115,91 @@ public class Day16
             }
             return release + max;
         }
+
+        record StackItem(Valve valve, int time, int total, List<Valve> openValves);
+
+        internal int SearchMaxReleasePressure(int time, int maxValveCount)
+        {
+            int Release(List<Valve> openValves) => openValves.Sum(v => v.FlowRate);
+            var stack = new Stack<StackItem>();
+            var maxTot = 0;
+            stack.Push(new StackItem(this, time, 0, new List<Valve>()));
+            while (stack.Any())
+            {
+                var item = stack.Pop();
+                (var v, var t, var tot, var openValves) = item;
+                Assert.IsTrue(t >= 0, $"stack.Count={stack.Count} item={item}");
+                if (t == 0)
+                {
+                    //Console.WriteLine($"item={item} stack.Count={stack.Count}");
+                    maxTot = Math.Max(tot, maxTot);
+                }
+                else if (openValves.Count == maxValveCount)
+                {
+                    t--;
+                    tot += t * Release(openValves);
+                    maxTot = Math.Max(tot, maxTot);
+                }
+                else
+                {
+                    tot += Release(openValves);
+                    if (v.FlowRate > 0 && !openValves.Contains(v))
+                    {
+                        t--;
+                        var valves = new List<Valve>(openValves)
+                        {
+                            v
+                        };
+                        var next = new StackItem(v, t, tot, valves);
+                        stack.Push(next);
+                    }
+                    if (t > 0)
+                    {
+                        t--;
+                        foreach (var w in v._output.Where(x => !openValves.Contains(x)))
+                        {
+                            StackItem next = new (w, t, tot, openValves);
+                            stack.Push(next);
+                        }
+                    }
+                }
+            }
+
+            return maxTot;
+        }
+
+        record Steps(Valve v, int x);
+
+        internal int ShortestPath(Valve other)
+        {
+
+            var result = int.MaxValue;
+            var stack = new Stack<Steps>();
+            stack.Push(new Steps(this, 0));
+            while (stack.Any())
+            {
+                (var v, var x) = stack.Pop();
+                if (v == other)
+                {
+                    result = Math.Min(result, x);
+                }
+                else
+                {
+                    x++;
+                    if (x < result && x < 30)
+                    {
+                        foreach (var w in v._output)
+                        {
+                            if (!stack.Any(x => x.v.Name == w.Name))
+                            {
+                                stack.Push(new Steps(w, x));
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
     }
 
     private static string Part1(IEnumerable<string> input)
@@ -129,9 +215,12 @@ public class Day16
             var match = re.Match(line);
             Assert.IsTrue(match.Success, line);
             Assert.AreEqual(4, match.Groups.Count);
+      
             var valve = match.Groups["valve"].Value;
+            
             var flowRate = int.Parse(match.Groups["flowrate"].Value);
             Valve.MaxFlow += flowRate;
+            
             Valve v = new Valve() { FlowRate = flowRate, Name = valve };
             valves.Add(v);
         }
@@ -141,6 +230,7 @@ public class Day16
             var match = re.Match(line);
             Assert.IsTrue(match.Success, line);
             Assert.AreEqual(4, match.Groups.Count);
+            
             var name = match.Groups["valve"].Value;
             var outputs = match.Groups["output"].Value.Split(", ");
 
@@ -151,10 +241,31 @@ public class Day16
                 valve.AddOutput(output);
             }
         }
-        var cache = new Dictionary<(Valve, bool, int), int>();
-        var openValves = new List<Valve>();
+
+        var distances = new Dictionary<(Valve, Valve), int>();
+        foreach (var v1 in valves)
+        {
+            foreach (var v2 in valves)
+            {
+                if (v1 == v2) continue;
+                if (v1 == root || v2 == root || (v1.FlowRate > 0 && v2.FlowRate > 0) )
+                {
+                    var key = string.Join(",", (new List<string> { v1.Name, v2.Name }).OrderBy(x => x));
+                    if (!distances.TryGetValue((v1, v2), out var x))
+                    {
+                        distances[(v1, v2)] = v1.ShortestPath(v2);
+                        distances[(v2, v1)] = distances[(v1, v2)];
+                    }
+                }
+            }
+        }
+
         var time = 30;
-        var result = root.MaxReleasedPressure(time, ref openValves, ref cache);
+        var maxValveCount = valves.Count(v => v.FlowRate > 0);
+        //var cache = new Dictionary<(Valve, bool, int), int>();
+        //var openValves = new List<Valve>();
+        //var result = root.MaxReleasedPressure(time, ref openValves, ref cache);
+        int result = root.SearchMaxReleasePressure(time, maxValveCount);
         return result.ToString();
     }
     
@@ -183,7 +294,7 @@ public class Day16
             Valve JJ has flow rate=21; tunnel leads to valve II
             """;
         var result = Part1(Common.GetLines(input));
-        Assert.AreEqual("", result);
+        Assert.AreEqual("1651", result);
     }
     
     [TestMethod]
